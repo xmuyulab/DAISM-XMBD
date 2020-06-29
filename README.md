@@ -8,4 +8,15 @@ A pre-print describing the method is available at Biorxiv:
  ### Installation
  
 We provide a docker image with DAISM-DNN installed:
-[DAISM-DNN](https://hub.docker.com/r/kevinmenden/scaden)
+[DAISM-DNN]()
+
+### Cell Types Supported
+|Granularity|Cell types|
+|---|---|
+|Coarse-garined|B.cells|
+||CD4.T.cells|
+||CD8.T.cells|
+||Monocytes|
+||NK.cells|
+||Neutrophils|
+|Fine-grained|Naive.B.cells|
