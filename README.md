@@ -55,12 +55,12 @@ python daism_dnn.py DAISM-DNN -platform Rs -caliExp path1 -caliFra path2 -pureEx
 Required arguments:
 -platform    string    The platform of data, [Rs]: RNA-seq tpm + scRNA, [Rt]: RNA-seq tpm + tpm,
                         [Ms]: Microarray + scRNA
--caliExp      string   The calibration sample expression file
--caliFra      string   The calibration sample ground truth file
--pureExp      string   The purified expression
--simNum       int      The number of simulation sample
--inputExp     string   The test sample expression file
--outputDir    string   The directory of output result file
+-caliExp     string   The calibration sample expression file
+-caliFra     string   The calibration sample ground truth file
+-pureExp     string   The purified expression
+-simNum      int      The number of simulation sample
+-inputExp    string   The test sample expression file
+-outputDir   string   The directory of output result file
 
 - simulation modules:
 python daism_dnn.py simulation -h
