@@ -50,22 +50,69 @@ DAISM-DNN consists of four modules:
 
 - DAISM-DNN modules: 
 python daism_dnn.py DAISM-DNN -h
+
 python daism_dnn.py DAISM-DNN -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1 -inputExp path4
 
 Required arguments:
--platform    string    The platform of data, [Rs]: RNA-seq tpm + scRNA, [Rt]: RNA-seq tpm + tpm,
-                        [Ms]: Microarray + scRNA
+
+-platform    string    The platform of data, [Rs]: RNA-seq tpm + scRNA, [Rt]: RNA-seq tpm + tpm, [Ms]: Microarray + scRNA
+                        
 -caliExp     string   The calibration sample expression file
+
 -caliFra     string   The calibration sample ground truth file
+
 -pureExp     string   The purified expression
+
 -simNum      int      The number of simulation sample
+
 -inputExp    string   The test sample expression file
+
 -outputDir   string   The directory of output result file.
 
 - simulation modules:
+
 python daism_dnn.py simulation -h
+
 python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1
+
+Required arguments:
+
+-platform    string   The platform of data, [Rs]: RNA-seq tpm + scRNA, [Rt]: RNA-seq tpm + tpm, [Ms]: Microarray + scRNA
+
+-caliExp     string   The calibration sample expression file
+
+-caliFra     string   The calibration sample ground truth file
+
+-pureExp     string   The purified expression
+
+-simNum      int      The number of simulation sample
+
+-outputDir   string   The directory of output result file
+
 - training modules:
+
+python daism_dnn.py training -h 
+
+python daism_dnn.py training -trainExp path1 -trainFra path1 -outputDir dir1
+
+Required arguments:
+
+-trainExp    string   The simulated sample expression file
+
+-trainFra    string   The simulated sample ground truth file
+
+-outputDir   string   The directory of output result file
+
 - prediction modules:
 
+python daism_dnn.py prediction -h 
 
+python daism_dnn.py prediction -inputExp path1 -model path2 -cellType path3 -feature path4 -outputDir dir1
+
+Required arguments:
+
+-inputExp   string    The test sample expression file
+-model      string    The deep-learing model file trained by DAISM-DNN
+-cellType   string    Model celltypes
+-feature    string    Model celltypes
+-outputDir  string    The directory of output result file
