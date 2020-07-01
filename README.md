@@ -8,10 +8,10 @@ A pre-print describing the method is available at Biorxiv:
  ### Dependencies
  It is recommended to create a new conda environment:
  ```
- conda create -n DAISM python=3.7
+ conda create -n DAISM_DNN python=3.7
 
 # Activate this environment:
-conda activate DAISM
+conda activate DAISM_DNN
  ```
  ```
 argh (0.26.2) 
@@ -44,3 +44,12 @@ We provide a docker image with DAISM-DNN installed:
 ||Memory.CD4.T.cells|
 ||Naive.CD8.T.cells|
 ||Memory.CD8.T.cells|
+
+### Usage
+DAISM-DNN consists of four modules:
+
+- simulation modules:
+- training modules:
+- prediction modules:
+
+
