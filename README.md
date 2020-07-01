@@ -60,7 +60,7 @@ Required arguments:
 -pureExp     string   The purified expression
 -simNum      int      The number of simulation sample
 -inputExp    string   The test sample expression file
--outputDir   string   The directory of output result file
+-outputDir   string   The directory of output result file.
 
 - simulation modules:
 python daism_dnn.py simulation -h
