@@ -13,6 +13,7 @@ A pre-print describing the method is available at Biorxiv:
 # Activate this environment:
 conda activate DAISM_DNN
  ```
+ Install the dependencies below:
  ```
 python (v3.7.7)
 pytorch (v1.5.1)
@@ -28,6 +29,24 @@ scipy (v1.5.0)
 We provide a docker image with DAISM-DNN installed:
 [https://hub.docker.com/r/zoelin1130/daism_dnn](https://hub.docker.com/r/zoelin1130/daism_dnn)
 
+Pull the docker image:
+```
+docker pull zoelin1130/daism_dnn:1.0
+```
+Create a container (GPU):
+```
+docker run --gpus all -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
+```
+Create a container (GPU):
+```
+docker run -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
+```
+```run_daism```is your container name.
+Add data to container:
+```
+docker cp exampledata run_daism:/workspace/
+```
+```exampledata```means the directory or files of your data.
 ### Cell Types Supported
 
 |Granularity|Cell types|
@@ -47,6 +66,7 @@ change directory (cd) to daism_dnn folder and call daismIndex module help for de
 cd daism_dnn
 python daism_dnn.py -h
 ```
+If you use docker to run our software:
 
 DAISM-DNN consists of four modules:
 
