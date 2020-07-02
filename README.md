@@ -46,10 +46,91 @@ We provide a docker image with DAISM-DNN installed:
 ||Memory.CD8.T.cells|
 
 ### Usage
+First of all, we should:
+change directory (cd) to daism_dnn folder and call daismIndex module help for details
+```
+cd daism_dnn
+python daism_dnn.py -h
+```
+
 DAISM-DNN consists of four modules:
 
+- DAISM-DNN modules: 
+```
+python daism_dnn.py DAISM-DNN -h
+
+python daism_dnn.py DAISM-DNN -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1 -inputExp path4
+
+Required arguments:
+
+-platform    string    The platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
+                        
+-caliExp     string   The calibration samples expression file
+
+-caliFra     string   The calibration samples ground truth file
+
+-pureExp     string   The purified samples expression (h5ad)
+
+-simNum      int      The number of simulation samples
+
+-inputExp    string   The test samples expression file
+
+-outputDir   string   The directory of result files
+```
+
 - simulation modules:
+```
+
+python daism_dnn.py simulation -h
+
+python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1
+
+Required arguments:
+
+-platform string The platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
+
+-caliExp     string   The calibration samples expression file
+
+-caliFra     string   The calibration samples ground truth file
+
+-pureExp     string   The purified samples expression (h5ad)
+
+-simNum      int      The number of simulation samples
+
+-outputDir   string   The directory of simulated output files
+```
+
 - training modules:
+```
+
+python daism_dnn.py training -h 
+
+python daism_dnn.py training -trainExp path1 -trainFra path1 -outputDir dir1
+
+Required arguments:
+
+-trainExp    string   The simulated samples expression file
+
+-trainFra    string   The simulated samples ground truth file
+
+-outputDir   string   The directory of output files
+```
+
 - prediction modules:
+```
+python daism_dnn.py prediction -h 
 
+python daism_dnn.py prediction -inputExp path1 -model path2 -cellType path3 -feature path4 -outputDir dir1
 
+Required arguments:
+
+-inputExp   string    The test samples expression file
+
+-model      string    The deep-learing model file trained by DAISM-DNN
+
+-cellType   string    Model celltypes
+
+-feature    string    Model features
+
+-outputDir  string    The directory of output result files
+```
