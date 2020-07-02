@@ -42,6 +42,7 @@ Create a container (CPU):
 docker run -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
 ```
 ```run_daism```is your container name.
+
 Add data to container:
 ```
 docker cp exampledata run_daism:/workspace/
