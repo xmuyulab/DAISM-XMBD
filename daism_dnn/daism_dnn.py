@@ -29,9 +29,9 @@ import prediction
 parser = argparse.ArgumentParser(description='DAISM-DNN deconvolution.')
 subparsers = parser.add_subparsers(dest='subcommand', help='Select one of the following sub-commands')
 
-parser_a = subparsers.add_parser('DAISM-DNN', help='DAISM-DNN')
+parser_a = subparsers.add_parser('DAISM-DNN', help='one-stop mode to run DAISM-DNN')
 #parser_a.add_argument("-cell", type=str, help="The mode of cell types, [C]: Coarse, [F]: Fine", default='C')
-parser_a.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
+parser_a.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
 parser_a.add_argument("-caliExp", type=str, help="Calibration samples expression file", default="../data/testdata/example_refexp.txt")
 parser_a.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default="../data/testdata/example_reffra.txt")
 parser_a.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="")
@@ -39,8 +39,8 @@ parser_a.add_argument("-simNum", type=int, help="Simulation samples number", def
 parser_a.add_argument("-inputExp", type=str, help="Test samples expression file", default="../data/testdata/example_tarexp.txt")
 parser_a.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
-parser_b = subparsers.add_parser('simulation', help='simulation')
-parser_b.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
+parser_b = subparsers.add_parser('simulation', help='simulation for training datasets')
+parser_b.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
 parser_b.add_argument("-caliExp", type=str, help="Calibration samples expression file", default="../data/testdata/example_refexp.txt")
 parser_b.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default="../data/testdata/example_reffra.txt")
 parser_b.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="")
@@ -49,7 +49,7 @@ parser_b.add_argument("-outputDir", type=str, help="Output result file directory
 
 
 
-parser_c = subparsers.add_parser('training', help='training')
+parser_c = subparsers.add_parser('training', help='training DAISM-DNN')
 parser_c.add_argument("-trainExp", type=str, help="Simulated samples expression file", default="../data/testdata/example_refexp.txt")
 parser_c.add_argument("-trainFra", type=str, help="Simulated samples ground truth file", default="../data/testdata/example_reffra.txt")
 parser_c.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
