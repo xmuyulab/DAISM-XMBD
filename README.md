@@ -57,7 +57,7 @@ The example we provide contains the following cell types.
 ||CD8.T.cells|
 ||Monocytes|
 ||NK.cells|
-||Neutrophils|
+
 DAISM-DNN can support the prediction of any cell types, as long as you provide calibration samples with ground truth and purified expression profiles of corresponding cell types.
 
 ### Usage
