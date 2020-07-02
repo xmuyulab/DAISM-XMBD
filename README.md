@@ -37,7 +37,7 @@ Create a container (GPU):
 ```
 docker run --gpus all -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
 ```
-Create a container (GPU):
+Create a container (CPU):
 ```
 docker run -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
 ```
