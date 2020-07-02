@@ -49,7 +49,7 @@ docker cp exampledata run_daism:/workspace/
 ```
 ```exampledata```means the directory or files of your data.
 ### Cell Types Supported
-
+The example we provide contains the following cell types.
 |Granularity|Cell types|
 |---|---|
 |Coarse-garined|B.cells|
@@ -58,7 +58,7 @@ docker cp exampledata run_daism:/workspace/
 ||Monocytes|
 ||NK.cells|
 ||Neutrophils|
-
+DAISM-DNN can support the prediction of any cell types, as long as you provide calibration samples with ground truth and purified expression profiles of corresponding cell types.
 
 ### Usage
 First of all, we should:
