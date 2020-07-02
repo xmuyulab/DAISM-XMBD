@@ -14,19 +14,19 @@ A pre-print describing the method is available at Biorxiv:
 conda activate DAISM_DNN
  ```
  ```
-argh (0.26.2) 
-anndata (0.6.22)
-scanpy (1.4.3)
-sklearn (0.0)
-scikit-learn (0.21.2)
-scipy (1.3.0)
-python (3.7.3)
-numpy (1.16.3)
-pytorch (1.0.1)
-pandas (0.25.1)
+python (v3.7.7)
+pytorch (v1.5.1)
+pandas (v1.0.5)
+numpy (v1.18.1)
+sklearn (v0.0)
+scikit-learn (v0.23.1)
+argh (v0.26.2) 
+anndata (v0.7.3)
+scanpy (v1.5.1)
+scipy (v1.5.0)
 ```
 We provide a docker image with DAISM-DNN installed:
-[DAISM-DNN]()
+[https://hub.docker.com/r/zoelin1130/daism_dnn](https://hub.docker.com/r/zoelin1130/daism_dnn)
 
 ### Cell Types Supported
 
@@ -38,12 +38,7 @@ We provide a docker image with DAISM-DNN installed:
 ||Monocytes|
 ||NK.cells|
 ||Neutrophils|
-|Fine-grained|Naive.B.cells|
-||Memory.B.cells|
-||Naive.CD4.T.cells|
-||Memory.CD4.T.cells|
-||Naive.CD8.T.cells|
-||Memory.CD8.T.cells|
+
 
 ### Usage
 First of all, we should:
