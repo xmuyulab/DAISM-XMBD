@@ -119,7 +119,7 @@ def evaluate(model,xve,yve,epoch):
     return mae_ve
 
 def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0):
-    
+    print('model_trainging start!')
     # Fixed parameter definition
     lr_min = 1e-5   # Minimum learning rate
     de_lr = 0.9    # Attenuation index

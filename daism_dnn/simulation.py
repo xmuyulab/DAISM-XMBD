@@ -84,6 +84,7 @@ def preprocess_purified(purepath,platform,samexp):
 
 
 def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, marker,min_f=0.01, max_f=0.99):
+    print('mixture_simulation start!')
     gn = trainexp.shape[0]
     cn = trainfra.shape[0]
     sn = trainfra.shape[1]

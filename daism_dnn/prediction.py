@@ -43,7 +43,7 @@ def minmaxscaler(x):
     return x
 
 def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
-
+    print("result_prediction start!")
     data = testsam.reindex(feature)    
     data = minmaxscaler(data).values.T
     data = torch.from_numpy(data)
@@ -54,7 +54,7 @@ def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
     out = model(data)
     
     pred = Variable(out,requires_grad=False).cpu().numpy().reshape(testsam.shape[1],len(celltypes))    
-    print(pred)
+    
     pred_result = pd.DataFrame(pred.T,index=celltypes,columns=testsam.columns)
     
     #pred_result.to_csv(outdir+"dnn_daism_result.txt",sep="\t")

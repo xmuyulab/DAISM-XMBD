@@ -21,8 +21,6 @@ import math
 import simulation
 import training
 import prediction
-from pandas.core.index import RangeIndex
-import pandas.util.testing as tm
 #--------------------------------------        
 #--------------------------------------        
 
@@ -33,41 +31,43 @@ subparsers = parser.add_subparsers(dest='subcommand', help='Select one of the fo
 
 parser_a = subparsers.add_parser('DAISM-DNN', help='DAISM-DNN')
 #parser_a.add_argument("-cell", type=str, help="The mode of cell types, [C]: Coarse, [F]: Fine", default='C')
-parser_a.add_argument("-platform", type=str, help="The platform of data, [Rs]: RNA-seq tpm + scRNA, [Rt]: RNA-seq tpm + tpm, [Ms]: Microarray + scRNA", default="Rs")
-parser_a.add_argument("-caliExp", type=str, help="The calibration sample expression file", default="../data/testdata/example_refexp.txt")
-parser_a.add_argument("-caliFra", type=str, help="The calibration sample ground truth file", default="../data/testdata/example_reffra.txt")
-parser_a.add_argument("-pureExp", type=str, help="The purified expression", default="")
-parser_a.add_argument("-simNum", type=int, help="The number of simulation sample ", default=16000)
-parser_a.add_argument("-inputExp", type=str, help="The test sample expression file", default="../data/testdata/example_tarexp.txt")
-parser_a.add_argument("-outputDir", type=str, help="The directory of output result file", default="../output/")
+parser_a.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
+parser_a.add_argument("-caliExp", type=str, help="Calibration samples expression file", default="../data/testdata/example_refexp.txt")
+parser_a.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default="../data/testdata/example_reffra.txt")
+parser_a.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="")
+parser_a.add_argument("-simNum", type=int, help="Simulation samples number", default=16000)
+parser_a.add_argument("-inputExp", type=str, help="Test samples expression file", default="../data/testdata/example_tarexp.txt")
+parser_a.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
 parser_b = subparsers.add_parser('simulation', help='simulation')
-parser_b.add_argument("-platform", type=str, help="The platform of data, [Rs]: RNA-seq tpm + scRNA, [Rt]: RNA-seq tpm + tpm, [Ms]: Microarray + scRNA", default="Rs")
-parser_b.add_argument("-caliExp", type=str, help="The calibration sample expression file", default="../data/testdata/example_refexp.txt")
-parser_b.add_argument("-caliFra", type=str, help="The calibration sample ground truth file", default="../data/testdata/example_reffra.txt")
-parser_b.add_argument("-pureExp", type=str, help="The purified expression", default="")
-parser_b.add_argument("-simNum", type=int, help="The number of simulation sample ", default=16000)
-parser_b.add_argument("-outputDir", type=str, help="The directory of output result file", default="../output/")
+parser_b.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
+parser_b.add_argument("-caliExp", type=str, help="Calibration samples expression file", default="../data/testdata/example_refexp.txt")
+parser_b.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default="../data/testdata/example_reffra.txt")
+parser_b.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="")
+parser_b.add_argument("-simNum", type=int, help="Simulation samples number", default=16000)
+parser_b.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
 
 
 parser_c = subparsers.add_parser('training', help='training')
-parser_c.add_argument("-trainExp", type=str, help="The simulated sample expression file", default="../data/testdata/example_refexp.txt")
-parser_c.add_argument("-trainFra", type=str, help="The simulated sample ground truth file", default="../data/testdata/example_reffra.txt")
-parser_c.add_argument("-outputDir", type=str, help="The directory of output result file", default="../output/")
+parser_c.add_argument("-trainExp", type=str, help="Simulated samples expression file", default="../data/testdata/example_refexp.txt")
+parser_c.add_argument("-trainFra", type=str, help="Simulated samples ground truth file", default="../data/testdata/example_reffra.txt")
+parser_c.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
 parser_d = subparsers.add_parser('prediction', help='prediction')
-parser_d.add_argument("-inputExp", type=str, help="The test sample expression file", default="../data/testdata/example_tarexp.txt")
-parser_d.add_argument("-model", type=str, help="The deep-learing model file trained by DAISM-DNN", default="../output/dnn_daism_model.pkl")
+parser_d.add_argument("-inputExp", type=str, help="Test samples expression file", default="../data/testdata/example_tarexp.txt")
+parser_d.add_argument("-model", type=str, help="Deep-learing model file trained by DAISM-DNN", default="../output/dnn_daism_model.pkl")
 parser_d.add_argument("-cellType", type=str, help="Model celltypes", default="../output/dnn_daism_celltypes.txt")
-parser_d.add_argument("-feature", type=str, help="Model celltypes", default="../output/dnn_daism_celltypes.txt")
-parser_d.add_argument("-outputDir", type=str, help="The directory of output result file", default="../output/")
+parser_d.add_argument("-feature", type=str, help="Model feature", default="../output/dnn_daism_feature.txt")
+parser_d.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
 
 
 def main():
     # parse some argument lists
     inputArgs = parser.parse_args()
+    if os.path.exists(inputArgs.outputDir)==False:
+        os.mkdir(inputArgs.outputDir)
     random_seed = 777
     if (inputArgs.subcommand=='DAISM-DNN'):
         min_f = 0.01
