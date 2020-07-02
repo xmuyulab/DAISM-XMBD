@@ -49,7 +49,8 @@ docker cp exampledata run_daism:/workspace/
 ```
 ```exampledata```means the directory or files of your data.
 ### Cell Types Supported
-The example we provide contains the following cell types.
+The example we provide contains the following cell types. The purified dataset for data augmentation can be downloaded from:[https://figshare.com/s/b5737bec1ab6e1502b5a](https://figshare.com/s/b5737bec1ab6e1502b5a)
+
 |Granularity|Cell types|
 |---|---|
 |Coarse-garined|B.cells|
@@ -67,7 +68,6 @@ change directory (cd) to daism_dnn folder and call daismIndex module help for de
 cd daism_dnn
 python daism_dnn.py -h
 ```
-If you use docker to run our software:
 
 DAISM-DNN consists of four modules:
 
@@ -79,7 +79,7 @@ python daism_dnn.py DAISM-DNN -platform Rs -caliExp path1 -caliFra path2 -pureEx
 
 Required arguments:
 
--platform    string    The platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
+-platform    string    The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
                         
 -caliExp     string   The calibration samples expression file
 
@@ -103,7 +103,7 @@ python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureE
 
 Required arguments:
 
--platform string The platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
+-platform string The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
 
 -caliExp     string   The calibration samples expression file
 
