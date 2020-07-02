@@ -125,8 +125,12 @@ python daism_dnn.py prediction -inputExp path1 -model path2 -cellType path3 -fea
 Required arguments:
 
 -inputExp   string    The test samples expression file
+
 -model      string    The deep-learing model file trained by DAISM-DNN
+
 -cellType   string    Model celltypes
+
 -feature    string    Model features
+
 -outputDir  string    The directory of output result files
 ```
