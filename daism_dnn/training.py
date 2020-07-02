@@ -172,13 +172,13 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
         if epoch >= min_epoch:
             if mae_ve[epoch] <= min_mae:
                 min_mae = mae_ve[epoch]
-                torch.save(model.state_dict(), modelpath+'DAISM-DNN_model.pkl')
+                torch.save(model.state_dict(), modelpath+'/DAISM-DNN_model.pkl')
                 n = 0
             else:
                 n += 1
             if n==10:
                 break
 
-    model.load_state_dict(torch.load(modelpath+'DAISM-DNN_model.pkl'))
+    model.load_state_dict(torch.load(modelpath+'/DAISM-DNN_model.pkl'))
     print("model_trainging finish!")
     return model
