@@ -79,7 +79,7 @@ python daism_dnn.py DAISM-DNN -platform Rs -caliExp path1 -caliFra path2 -pureEx
 
 Required arguments:
 
--platform    string    The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
+-platform    string   The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
                         
 -caliExp     string   The calibration samples expression file
 
@@ -103,7 +103,7 @@ python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureE
 
 Required arguments:
 
--platform string The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
+-platform    string   The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
 
 -caliExp     string   The calibration samples expression file
 
