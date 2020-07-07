@@ -39,15 +39,10 @@ docker run --gpus all -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
 ```
 Create a container (CPU):
 ```
-docker run -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
+docker run -i -t run_daism -v example:/workspace/example/ /zoelin1130/daism_dnn:1.0 /bin/bash
 ```
-```run_daism```is your container name.
+```run_daism```is your container name. ```example```means the directory of your data.
 
-Add data to container:
-```
-docker cp exampledata run_daism:/workspace/
-```
-```exampledata```means the directory or files of your data.
 ### Cell Types Supported
 The example we provide contains the following cell types. The purified dataset for data augmentation can be downloaded from:[https://figshare.com/s/b5737bec1ab6e1502b5a](https://figshare.com/s/b5737bec1ab6e1502b5a)
 

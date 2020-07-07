@@ -1,49 +1,11 @@
-import os
-import sys
+#
 import torch
-import numpy as np
 import pandas as pd
-import torch.nn as nn
 from torch.autograd import Variable
-
-class MLP(torch.nn.Module):  
-    def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
-        super(MLP, self).__init__()  
-        L1 = 256
-        L2 = 512
-        L3 = 128
-        L4 = 32
-        L5 = 16
-        self.hidden = torch.nn.Sequential(                       
-            nn.Linear(INPUT_SIZE, L1),
-            nn.Tanh(),
-            nn.Linear(L1,L2),
-            nn.BatchNorm1d(L2),
-            #nn.Dropout(0.1),
-            nn.ReLU(),
-            nn.Linear(L2,L3),
-            nn.Tanh(),
-            nn.Linear(L3,L4),
-            nn.ReLU(),
-            nn.Linear(L4,L5),
-            nn.Tanh(),
-        )
-        self.predict =  torch.nn.Sequential( 
-            nn.Linear(L5, OUTPUT_SIZE),
-            # nn.Softmax()
-        )
-    def forward(self, x):   
-        y = self.hidden(x)    
-        y = self.predict(y)   
-        return y
-
-def minmaxscaler(x):
-    x = np.log2(x + 1)
-    x = (x - x.min(axis = 0))/(x.max(axis = 0) - x.min(axis = 0))
-    return x
+from training import MLP,minmaxscaler
 
 def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
-    print("result_prediction start!")
+    print("Result prediction start!")
     data = testsam.reindex(feature)    
     data = minmaxscaler(data).values.T
     data = torch.from_numpy(data)
@@ -57,8 +19,7 @@ def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
     
     pred_result = pd.DataFrame(pred.T,index=celltypes,columns=testsam.columns)
     
-    #pred_result.to_csv(outdir+"dnn_daism_result.txt",sep="\t")
-    print("result_prediction finish!")
+    print("Result prediction finish!")
     return pred_result
 
 def model_load(commongene, celltypes, modelpath, outdir, random_seed, ncuda):

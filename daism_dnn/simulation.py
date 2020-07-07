@@ -1,12 +1,11 @@
 #
-import os
 import sys
 import time
 import numpy as np
 import pandas as pd
 import random
 from random import randint, sample
-import scanpy.api as sc
+import scanpy as sc
 import anndata
 import math
 
@@ -63,7 +62,7 @@ def preprocess_purified(purepath,platform,samexp):
     
     cell_list = list(raw_input.obs['cell.type'].unique())
     
-    C_df = {}#pandas dict
+    C_df = {} #pandas dict
     C_all = {} #numpy dict
     for cell in cell_list:
         C_df[cell] = readh5ad(raw_input,[cell])
@@ -84,7 +83,7 @@ def preprocess_purified(purepath,platform,samexp):
 
 
 def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, marker,min_f=0.01, max_f=0.99):
-    print('mixture_simulation start!')
+    print('Mixtures simulation start!')
     gn = trainexp.shape[0]
     cn = trainfra.shape[0]
     sn = trainfra.shape[1]
@@ -97,7 +96,7 @@ def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, 
     random.seed(random_seed)
     np.random.seed(random_seed)
 
-    process_bar = ShowProcess(N, 'mixture_simulation finish!')
+    process_bar = ShowProcess(N, 'Mixtures simulation finish!')
 
     mixsam = np.zeros(shape=(N, gn))
     mixfra = np.zeros(shape=(N, cn))
@@ -154,9 +153,5 @@ def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, 
     
     mixsam = mixsam.reindex(feature) 
     celltypes = list(mixfra.index)
-
-    #mixsam.to_csv(outdir+"dnn_daism_mixsam.txt",sep="\t")
-    #mixfra.to_csv(outdir+"dnn_daism_mixfra.txt",sep="\t")
-    #pd.DataFrame(celltypes).to_csv(outdir+"dnn_daism_celltypes.txt",sep="\t")
     
     return (mixsam, mixfra, celltypes, feature)
