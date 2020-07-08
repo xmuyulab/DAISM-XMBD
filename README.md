@@ -37,7 +37,7 @@ docker run --gpus all -i -t run_daism -v example:/workspace/example/ zoelin1130/
 ```
 Create a container (CPU):
 ```
-docker run -i -t run_daism -v example:/workspace/example/ /zoelin1130/daism_dnn:1.0 /bin/bash
+docker run -i -t run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
 ```
 ```run_daism```is your container name. ```example```means the directory of your data.
 
