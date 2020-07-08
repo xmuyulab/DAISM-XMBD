@@ -19,11 +19,9 @@ python (v3.7.7)
 pytorch (v1.5.1)
 pandas (v1.0.5)
 numpy (v1.18.1)
-sklearn (v0.0)
 scikit-learn (v0.23.1)
 argh (v0.26.2) 
 anndata (v0.7.3)
-scanpy (v1.5.1)
 scipy (v1.5.0)
 ```
 We provide a docker image with DAISM-DNN installed:
@@ -35,7 +33,7 @@ docker pull zoelin1130/daism_dnn:1.0
 ```
 Create a container (GPU):
 ```
-docker run --gpus all -i -t run_daism zoelin1130/daism_dnn:1.0 /bin/bash
+docker run --gpus all -i -t run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
 ```
 Create a container (CPU):
 ```
