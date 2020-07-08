@@ -22,7 +22,7 @@ numpy (v1.18.1)
 scikit-learn (v0.23.1)
 argh (v0.26.2) 
 anndata (v0.7.3)
-scipy (v1.5.0)
+scanpy (v1.5.1)
 ```
 We provide a docker image with DAISM-DNN installed:
 [https://hub.docker.com/r/zoelin1130/daism_dnn](https://hub.docker.com/r/zoelin1130/daism_dnn)
