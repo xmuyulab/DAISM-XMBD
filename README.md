@@ -44,13 +44,13 @@ docker run -i -t run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1
 ### Cell Types Supported
 The example we provide contains the following cell types. The purified dataset for data augmentation can be downloaded from:[https://figshare.com/s/b5737bec1ab6e1502b5a](https://figshare.com/s/b5737bec1ab6e1502b5a)
 
-|Granularity|Cell types|
-|---|---|
-|Coarse-garined|B.cells|
-||CD4.T.cells|
-||CD8.T.cells|
-||Monocytes|
-||NK.cells|
+pbmc8k.h5ad contains 5 cell types: B.cells, CD4.T.cells, CD8.T.cells, monocytic.lineage, NK.cells.
+
+pbmc8k_fine.h5ad contains 11 cell types: naive.B.cells, memory.B.cells, naive.CD4.T.cells, memory.CD4.T.cells,naive.CD8.T.cells, memory.CD8.T.cells, regulatory.T.cells, monocytes, macrophages, myeloid.dendritic.cells, NK.cells.
+
+RNA-seq_TPM.h5ad contains 27 cell types: B.cells, monocytic.lineage, dendritic.cells, naive.CD4.T.cells, NK.cells, macrophage, regulatory.T.cells, naive.B.cells, memory.B.cells, neutrophils, CD4.T.cells, Central.memory.CD4.T.cells, Effector.memory.CD4.T.cells, endothelial.cells, fibroblasts, memory.CD4.T.cells, basophils, myeloid.dendritic.cells, CD8.T.cells, Central.memory.CD8.T.cells, naive.CD8.T.cells, Effector.memory.CD8.T.cells, eosinophils, follicular.helper.T.cells, gamma.delta.T.cells, plasma.cells,memory.CD8.T.cells.
+
+Note: Each cell type needs to be named according to above format.
 
 DAISM-DNN can support the prediction of any cell types, as long as you provide calibration samples with ground truth and purified expression profiles of corresponding cell types.
 
@@ -87,9 +87,20 @@ Required arguments:
 -outputDir   string   The directory of result files
 ```
 
-- simulation modules:
+Example: We use [pbmc8k.h5ad](https://figshare.com/s/b5737bec1ab6e1502b5a),a single cell RNA-seq dataset, as purified samples for data augmentation. And put it into the ```example``` directory. The calibration data is a RNA-seq expression profile ```example_caliexp.txt```. So we use ```Rs``` for platform parameter.
+
+```
+python daism_dnn.py DAISM-DNN -platform Rs -caliExp ../example/example_caliexp.txt -caliFra ../example/example_califra.txt -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/example_testexp.txt
+```
+If you don't have calibration samples, the training data simulation mode will change from ```DAISM``` to ```puremix```.
+
+```
+python daism_dnn.py DAISM-DNN -platform Rs -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/example_testexp.txt
 ```
 
+
+- simulation modules:
+```
 python daism_dnn.py simulation -h
 
 python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1
@@ -104,6 +115,8 @@ Required arguments:
 
 -pureExp     string   The purified samples expression (h5ad)
 
+-inputExp    string   The test samples expression file
+
 -simNum      int      The number of simulation samples
 
 -outputDir   string   The directory of simulated output files
@@ -111,7 +124,6 @@ Required arguments:
 
 - training modules:
 ```
-
 python daism_dnn.py training -h 
 
 python daism_dnn.py training -trainExp path1 -trainFra path1 -outputDir dir1

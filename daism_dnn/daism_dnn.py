@@ -22,9 +22,9 @@ subparsers = parser.add_subparsers(dest='subcommand', help='Select one of the fo
 parser_a = subparsers.add_parser('DAISM-DNN', help='DAISM-DNN')
 #parser_a.add_argument("-cell", type=str, help="The mode of cell types, [C]: Coarse, [F]: Fine", default='C')
 parser_a.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
-parser_a.add_argument("-caliExp", type=str, help="Calibration samples expression file", default="../data/testdata/example_refexp.txt")
-parser_a.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default="../data/testdata/example_reffra.txt")
-parser_a.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="")
+parser_a.add_argument("-caliExp", type=str, help="Calibration samples expression file", default=None)
+parser_a.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default=None)
+parser_a.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="../exampledata/pbmc8k.h5ad")
 parser_a.add_argument("-simNum", type=int, help="Simulation samples number", default=16000)
 parser_a.add_argument("-inputExp", type=str, help="Test samples expression file", default="../data/testdata/example_tarexp.txt")
 parser_a.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
@@ -32,9 +32,10 @@ parser_a.add_argument("-outputDir", type=str, help="Output result file directory
 # create the parser for the "simulation" command
 parser_b = subparsers.add_parser('simulation', help='simulation')
 parser_b.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
-parser_b.add_argument("-caliExp", type=str, help="Calibration samples expression file", default="../data/testdata/example_refexp.txt")
-parser_b.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default="../data/testdata/example_reffra.txt")
-parser_b.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="")
+parser_b.add_argument("-caliExp", type=str, help="Calibration samples expression file", default=None)
+parser_b.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default=None)
+parser_b.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default="../exampledata/pbmc8k.h5ad")
+parser_b.add_argument("-inputExp", type=str, help="Test samples expression file", default="../data/testdata/example_tarexp.txt")
 parser_b.add_argument("-simNum", type=int, help="Simulation samples number", default=16000)
 parser_b.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
@@ -74,14 +75,26 @@ def main():
 
     if (inputArgs.subcommand=='DAISM-DNN'):
         # Load calibration data
-        caliexp = pd.read_csv(inputArgs.caliExp, sep="\t", index_col=0)
-        califra = pd.read_csv(inputArgs.caliFra, sep="\t", index_col=0)
+        if inputArgs.caliExp == None and inputArgs.caliFra == None:
+            mode = "puremix"
+            caliexp = None
+            califra = None
+        else:
+            mode = "daism"
+            caliexp = pd.read_csv(inputArgs.caliExp, sep="\t", index_col=0)
+            califra = pd.read_csv(inputArgs.caliFra, sep="\t", index_col=0)
+
+        # Load test data
+        test_sample = pd.read_csv(inputArgs.inputExp, sep="\t", index_col=0)
 
         # Preprocess purified data
-        commongenes,caliexp,C_all = simulation.preprocess_purified(inputArgs.pureExp,inputArgs.platform,caliexp,califra)
+        commongenes,caliexp,C_all = simulation.preprocess_purified(inputArgs.pureExp,inputArgs.platform,mode,test_sample,caliexp,califra)
 
         # Create training dataset
-        mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.simNum,inputArgs.outputDir,inputArgs.platform,commongenes,Options.min_f,Options.max_f)
+        if mode == "daism":
+            mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.simNum,inputArgs.platform,commongenes,Options.min_f,Options.max_f)
+        if mode == "puremix":
+            mixsam, mixfra, celltypes, feature = simulation.puremix_simulation(C_all,Options.random_seed,inputArgs.simNum,inputArgs.platform,commongenes)
 
         # Save signature genes and celltype labels
         pd.DataFrame(feature).to_csv(inputArgs.outputDir+'/DAISM-DNN_feature.txt',sep='\t')
@@ -98,9 +111,6 @@ def main():
         # Save signature genes and celltype labels
         pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outputDir+'/DAISM-DNN_model_celltypes.txt',sep='\t')
         pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outputDir+'/DAISM-DNN_model_feature.txt',sep='\t')
-        
-        # Load test data
-        test_sample = pd.read_csv(inputArgs.inputExp, sep="\t", index_col=0)
 
         # Prediction
         result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),inputArgs.outputDir,Options.ncuda)
@@ -113,15 +123,27 @@ def main():
 
     if (inputArgs.subcommand=='simulation'):
         # Load calibration data
-        caliexp = pd.read_csv(inputArgs.caliExp, sep="\t", index_col=0)
-        califra = pd.read_csv(inputArgs.caliFra, sep="\t", index_col=0)
+        if inputArgs.caliExp == None and inputArgs.caliFra == None:
+            mode = "puremix"
+            caliexp = None
+            califra = None
+        else:
+            mode = "daism"
+            caliexp = pd.read_csv(inputArgs.caliExp, sep="\t", index_col=0)
+            califra = pd.read_csv(inputArgs.caliFra, sep="\t", index_col=0)
+
+        # Load test data
+        test_sample = pd.read_csv(inputArgs.inputExp, sep="\t", index_col=0)
 
         # Preprocess purified data
-        commongenes,caliexp,C_all = simulation.preprocess_purified(inputArgs.pureExp,inputArgs.platform,caliexp,califra)
-       
-        # Create training dataset
-        mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.simNum,inputArgs.outputDir,inputArgs.platform,commongenes,Options.min_f,Options.max_f)
+        commongenes,caliexp,C_all = simulation.preprocess_purified(inputArgs.pureExp,inputArgs.platform,mode,test_sample,caliexp,califra)
 
+        # Create training dataset
+        if mode == "daism":
+            mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.simNum,inputArgs.platform,commongenes,Options.min_f,Options.max_f)
+        if mode == "puremix":
+            mixsam, mixfra, celltypes, feature = simulation.puremix_simulation(C_all,Options.random_seed,inputArgs.simNum,inputArgs.platform,commongenes)
+            
         # Save signature genes and celltype labels
         pd.DataFrame(feature).to_csv(inputArgs.outputDir+'/DAISM-DNN_feature.txt',sep='\t')
         pd.DataFrame(celltypes).to_csv(inputArgs.outputDir+'/DAISM-DNN_celltypes.txt',sep='\t')

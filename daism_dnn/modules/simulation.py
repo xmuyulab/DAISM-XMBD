@@ -74,11 +74,12 @@ class ShowProcess():
         print(self.infoDone)
         self.i = 0
         
-def preprocess_purified(purepath,platform,samexp,samfra):
+def preprocess_purified(purepath,platform,mode,testexp,samexp=None,samfra=None):
     """
     Preprocess purified samples
     :param purepath: 
-    :param platform: 
+    :param platform:
+    :param mode: 
     :param samexp:
     :param samfra:
     :return:
@@ -88,8 +89,11 @@ def preprocess_purified(purepath,platform,samexp,samfra):
     # get available cell types of purified
     cell_list_available = list(raw_input.obs['cell.type'].unique())
 
-    # get calibration cell types
-    cell_list_cali = samfra.index
+    if mode == "daism":
+        # get calibration cell types
+        cell_list_cali = samfra.index
+    if mode == "puremix":
+        cell_list_cali = cell_list_available
 
     # get overlap between calibration cell types and available cell types
     cell_list = list(set(cell_list_available).intersection(list(cell_list_cali)))
@@ -104,8 +108,11 @@ def preprocess_purified(purepath,platform,samexp,samfra):
         C_df[cell] = readh5ad(raw_input,[cell])
 
     # get overlap between signature genes and purified samples genes
-    commongenes = list(set(list(samexp.index)).intersection(list(C_df[cell_list[0]].index)))
-    samexp = samexp.reindex(commongenes)
+    if mode == "daism":
+        commongenes = list(set(list(samexp.index)).intersection(list(C_df[cell_list[0]].index)).intersection(list(testexp.index)))
+        samexp = samexp.reindex(commongenes)
+    if mode =="puremix":
+        commongenes = list(set(list(testexp.index)).intersection(list(C_df[cell_list[0]].index)))
     
     for cell in cell_list:
             C_all[cell] = C_df[cell].reindex(commongenes).T.values
@@ -115,12 +122,13 @@ def preprocess_purified(purepath,platform,samexp,samfra):
 
         for cell in cell_list:
             C_all[cell] = sc_norm(C_all[cell],counts_per_cell_after=counts_per_cell_after)        
-    
+
     return(commongenes,samexp,C_all) 
 
 
-def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, marker,min_f=0.01, max_f=0.99):
-    print('Mixtures simulation start!')
+
+def daism_simulation(trainexp, trainfra,C_all, random_seed, N,platform, marker,min_f=0.01, max_f=0.99):
+    print('DAISM mixtures simulation start!')
     
     gn = trainexp.shape[0] # get feature gene number
     cn = trainfra.shape[0] # get cell type number
@@ -134,7 +142,7 @@ def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, 
     random.seed(random_seed)
     np.random.seed(random_seed)
 
-    process_bar = ShowProcess(N, 'Mixtures simulation finish!')
+    process_bar = ShowProcess(N, 'DAISM mixtures simulation finish!')
 
     mixsam = np.zeros(shape=(N, gn))
     mixfra = np.zeros(shape=(N, cn))
@@ -200,3 +208,76 @@ def daism_simulation(trainexp, trainfra,C_all, random_seed, N, outdir,platform, 
     celltypes = list(mixfra.index)
     
     return (mixsam, mixfra, celltypes, feature)
+
+def puremix_simulation(C_all, random_seed, N, platform,commongenes):
+
+    print('Puremix mixtures simulation start!')
+        
+    random.seed(random_seed)
+    np.random.seed(random_seed)
+
+    process_bar = ShowProcess(N, 'Puremix mixtures simulation finish!')
+
+    # get cell type list
+    celltypes = list(C_all.keys())
+    celltypes.sort()
+
+    mixsam = np.zeros(shape=(N, len(commongenes)))
+    mixfra = np.zeros(shape=(N, len(celltypes)))
+    
+    # create mixtures loop
+    for j in range(N):
+        random.seed(random_seed+j)
+        np.random.seed(random_seed+j)
+
+        if j % 2 == 0:
+            sparse = True
+        else:
+            sparse = False
+
+        if sparse:
+            no_keep = np.random.randint(1, len(celltypes))
+            keep = np.random.choice(list(range(len(celltypes))), size=no_keep, replace=False)
+            available_celltypes = [celltypes[i] for i in keep]                
+        else:
+            available_celltypes = celltypes
+
+        fraction = np.random.dirichlet([1]*len(available_celltypes), 1)*1
+        complete_fraction=[0]*len(celltypes)
+        for k, act in enumerate(available_celltypes):
+            idx = available_celltypes.index(act)
+            complete_fraction[idx] = fraction[0,k]
+
+        # RNA-seq TPM + RNA-seq TPM
+        if platform == "Rt":                
+            c_all = {}
+            for cell in celltypes:
+                c_all[cell] = C_all[cell][random.randint(0,C_all[cell].shape[0]-1)]*fraction[complete_fraction.index(cell)]
+
+            mix = np.vstack(tuple(c_all.values())).sum(axis=0)
+            mix = 1e+6*mix/np.sum(mix)
+            mixsam[j] = mix
+            mixfra[j] = np.array(complete_fraction)
+            process_bar.show_process()
+            time.sleep(0.0001)
+            
+        # RNA-seq TPM + scRNA-seq or Microarray + scRNA
+        elif platform == "Rs" or platform =='Ms':
+            cell_sum = 500
+
+            c_all = {}
+            
+            for cell in celltypes:
+                c_all[cell] = C_all[cell][np.random.choice(range(C_all[cell].shape[0]),math.ceil(complete_fraction[celltypes.index(cell)]*cell_sum))].sum(axis=0)
+
+            mix = np.vstack(tuple(c_all.values())).sum(axis=0)            
+            mixsam[j] = 1e+6*mix/np.sum(mix)
+            mixfra[j] = np.array(complete_fraction)
+            process_bar.show_process()
+            time.sleep(0.0001)
+    
+    mixsam = pd.DataFrame(mixsam.T,index = commongenes)
+    mixfra = pd.DataFrame(mixfra.T,index = celltypes) 
+    
+    return (mixsam, mixfra, celltypes, commongenes)
+  

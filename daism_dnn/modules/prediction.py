@@ -15,7 +15,7 @@ from daism_dnn.modules.training import MLP,minmaxscaler
 def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
     print("Result prediction start!")
     # preprocess test data
-    data = testsam.reindex(feature)    
+    data = testsam.reindex(feature)   
     data = minmaxscaler(data).T
     data = torch.from_numpy(data)
     if torch.cuda.is_available():
@@ -24,7 +24,8 @@ def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
     model.eval()
     out = model(data)
     
-    pred = Variable(out,requires_grad=False).cpu().numpy().reshape(testsam.shape[1],len(celltypes))    
+    pred = Variable(out,requires_grad=False).cpu().numpy().reshape(testsam.shape[1],len(celltypes))
+    pred[pred<0]=0    
     
     pred_result = pd.DataFrame(pred.T,index=celltypes,columns=testsam.columns)
     
