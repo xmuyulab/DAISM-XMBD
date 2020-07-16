@@ -1,20 +1,20 @@
 ## DAISM-DNN
 
-We propose data augmentation throughin silicomixing with deep neural networks (DAISM-DNN) to achieve highly accurate andunbiased  immune-cell  proportion  estimation  from  bulk  RNA  sequencing  (RNA-seq)  data. Our method tackles the batch effect problem by creating a data-specific training dataset froma small subset of samples with ground truth cell proportions which is further augmentedwith  publicly  available  RNA-seq  data  from  purified  cells  or  single-cell  RNA-seq  (scRNA-seq) data.
+We propose data augmentation through in silico mixing with deep neural networks (DAISM-DNN) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells or single-cell RNA-seq (scRNA-seq) data.
 
-A pre-print describing the method is available at Biorxiv:
+A pre-print describing the method is available at bioRxiv:
  [DAISM-DNN: Highly accurate cell type proportion estima-tion within silicodata augmentation and deep neural net-works](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v2)
  
- ### Dependencies
- It is recommended to create a new conda environment:
- ```
- conda create -n DAISM_DNN python=3.7
+### Dependencies
+It is recommended to create a new conda environment:
+```
+conda create -n DAISM_DNN python=3.7
 
 # Activate this environment:
 conda activate DAISM_DNN
- ```
- Install the dependencies below:
- ```
+```
+Install the dependencies below:
+```
 python (v3.7.7)
 pytorch (v1.5.1)
 pandas (v1.0.5)
@@ -50,13 +50,12 @@ pbmc8k_fine.h5ad contains 11 cell types: naive.B.cells, memory.B.cells, naive.CD
 
 RNA-seq_TPM.h5ad contains 27 cell types: B.cells, monocytic.lineage, dendritic.cells, naive.CD4.T.cells, NK.cells, macrophage, regulatory.T.cells, naive.B.cells, memory.B.cells, neutrophils, CD4.T.cells, Central.memory.CD4.T.cells, Effector.memory.CD4.T.cells, endothelial.cells, fibroblasts, memory.CD4.T.cells, basophils, myeloid.dendritic.cells, CD8.T.cells, Central.memory.CD8.T.cells, naive.CD8.T.cells, Effector.memory.CD8.T.cells, eosinophils, follicular.helper.T.cells, gamma.delta.T.cells, plasma.cells,memory.CD8.T.cells.
 
-Note: Each cell type needs to be named according to above format.
+Note: each cell type needs to be named according to above format.
 
-DAISM-DNN can support the prediction of any cell types, as long as you provide calibration samples with ground truth and purified expression profiles of corresponding cell types.
+DAISM-DNN can support the prediction of any cell types, as long as calibration samples with ground truth and purified expression profiles of corresponding cell types are provided.
 
 ### Usage
-First of all, we should:
-change directory (cd) to daism_dnn folder and call daismIndex module help for details
+In our example below, we set working directory to daism_dnn. Use -h to print out help information on DAISM-DNN modules.
 ```
 cd daism_dnn
 python daism_dnn.py -h
@@ -87,12 +86,12 @@ Required arguments:
 -outputDir   string   The directory of result files
 ```
 
-Example: We use [pbmc8k.h5ad](https://figshare.com/s/b5737bec1ab6e1502b5a),a single cell RNA-seq dataset, as purified samples for data augmentation. And put it into the ```example``` directory. The calibration data is a RNA-seq expression profile ```example_caliexp.txt```. So we use ```Rs``` for platform parameter.
+Example: we use [pbmc8k.h5ad](https://figshare.com/s/b5737bec1ab6e1502b5a), a single cell RNA-seq dataset, as purified samples for data augmentation. Put it under the ```example``` directory. The calibration data is an RNA-seq expression profile ```example_caliexp.txt```. So we use ```Rs``` for platform parameter.
 
 ```
 python daism_dnn.py DAISM-DNN -platform Rs -caliExp ../example/example_caliexp.txt -caliFra ../example/example_califra.txt -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/example_testexp.txt
 ```
-If you don't have calibration samples, the training data simulation mode will change from ```DAISM``` to ```puremix```.
+If no calibration samples are available, the training data simulation mode should be changed from ```DAISM``` to ```puremix```.
 
 ```
 python daism_dnn.py DAISM-DNN -platform Rs -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/example_testexp.txt
