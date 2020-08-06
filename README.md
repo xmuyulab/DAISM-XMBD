@@ -102,7 +102,7 @@ python daism_dnn.py DAISM-DNN -platform Rs -pureExp ../example/pbmc8k.h5ad -simN
 ```
 python daism_dnn.py simulation -h
 
-python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1
+python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -inputExp path4 -simNum 16000 -outputDir dir1
 
 Required arguments:
 
