@@ -245,7 +245,7 @@ def puremix_simulation(C_all, random_seed, N, platform,commongenes):
         fraction = np.random.dirichlet([1]*len(available_celltypes), 1)*1
         complete_fraction=[0]*len(celltypes)
         for k, act in enumerate(available_celltypes):
-            idx = available_celltypes.index(act)
+            idx = celltypes.index(act)
             complete_fraction[idx] = fraction[0,k]
 
         # RNA-seq TPM + RNA-seq TPM
