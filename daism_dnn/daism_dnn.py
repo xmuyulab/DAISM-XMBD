@@ -21,7 +21,7 @@ subparsers = parser.add_subparsers(dest='subcommand', help='Select one of the fo
 # create the parser for the "one-stop DAISM-DNN" command
 parser_a = subparsers.add_parser('DAISM-DNN', help='DAISM-DNN')
 #parser_a.add_argument("-cell", type=str, help="The mode of cell types, [C]: Coarse, [F]: Fine", default='C')
-parser_a.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
+parser_a.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
 parser_a.add_argument("-caliExp", type=str, help="Calibration samples expression file", default=None)
 parser_a.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default=None)
 parser_a.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default=None)
@@ -31,7 +31,7 @@ parser_a.add_argument("-outputDir", type=str, help="Output result file directory
 
 # create the parser for the "simulation" command
 parser_b = subparsers.add_parser('simulation', help='simulation')
-parser_b.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for agumentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
+parser_b.add_argument("-platform", type=str, help="Platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA", default="Rs")
 parser_b.add_argument("-caliExp", type=str, help="Calibration samples expression file", default=None)
 parser_b.add_argument("-caliFra", type=str, help="Calibration samples ground truth file", default=None)
 parser_b.add_argument("-pureExp", type=str, help="Purified samples expression (h5ad)", default=None)
@@ -48,9 +48,9 @@ parser_c.add_argument("-outputDir", type=str, help="Output result file directory
 # create the parser for the "prediction" command
 parser_d = subparsers.add_parser('prediction', help='prediction')
 parser_d.add_argument("-inputExp", type=str, help="Test samples expression file", default=None)
-parser_d.add_argument("-model", type=str, help="Deep-learing model file trained by DAISM-DNN", default="../output/dnn_daism_model.pkl")
-parser_d.add_argument("-cellType", type=str, help="Model celltypes", default="../output/dnn_daism_celltypes.txt")
-parser_d.add_argument("-feature", type=str, help="Model feature", default="../output/dnn_daism_feature.txt")
+parser_d.add_argument("-model", type=str, help="Deep-learing model file trained by DAISM-DNN", default="../output/DAISM-DNN_model.pkl")
+parser_d.add_argument("-cellType", type=str, help="Model celltypes", default="../output/DAISM-DNN_model_celltypes.txt")
+parser_d.add_argument("-feature", type=str, help="Model feature", default="../output//DAISM-DNN_model_feature.txt")
 parser_d.add_argument("-outputDir", type=str, help="Output result file directory", default="../output/")
 
 class Options:
@@ -162,7 +162,7 @@ def main():
         mixfra = pd.read_csv(inputArgs.trainFra, sep="\t", index_col=0)
 
         # Training model
-        model = training.dnn_training(mixsam,mixfra,random_seed,inputArgs.outputDir,Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda)
+        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outputDir,Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda)
 
         # Save signature genes and celltype labels
         pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outputDir+'/DAISM-DNN_model_celltypes.txt',sep='\t')
