@@ -33,7 +33,7 @@ docker pull zoelin1130/daism_dnn:1.0
 ```
 Create a container (GPU):
 ```
-docker run --gpus all -i -t run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
+docker run --gpus all -i -t --name run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
 ```
 Create a container (CPU):
 ```
