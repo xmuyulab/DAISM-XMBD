@@ -37,7 +37,7 @@ docker run --gpus all -i -t --name run_daism -v example:/workspace/example/ zoel
 ```
 Create a container (CPU):
 ```
-docker run -i -t run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
+docker run -i -t --name run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
 ```
 ```run_daism```is your container name. ```example```means the directory of your data.
 
@@ -89,12 +89,12 @@ Required arguments:
 Example: we use [pbmc8k.h5ad](https://figshare.com/s/b5737bec1ab6e1502b5a), a single cell RNA-seq dataset, as purified samples for data augmentation. Put it under the ```example``` directory. The calibration data is an RNA-seq expression profile ```example_caliexp.txt```. So we use ```Rs``` for platform parameter.
 
 ```
-python daism_dnn.py DAISM-DNN -platform Rs -caliExp ../example/example_caliexp.txt -caliFra ../example/example_califra.txt -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/example_testexp.txt
+python daism_dnn.py DAISM-DNN -platform Rs -caliExp ../example/caliexp.txt -caliFra ../example/califra.txt -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/testexp.txt
 ```
 If no calibration samples are available, the training data simulation mode should be changed from ```DAISM``` to ```puremix```.
 
 ```
-python daism_dnn.py DAISM-DNN -platform Rs -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/example_testexp.txt
+python daism_dnn.py DAISM-DNN -platform Rs -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/testexp.txt
 ```
 
 
