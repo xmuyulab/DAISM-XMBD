@@ -39,7 +39,7 @@ Create a container (CPU):
 ```
 docker run -i -t --name run_daism -v example:/workspace/example/ zoelin1130/daism_dnn:1.0 /bin/bash
 ```
-```run_daism```is your container name. You may modify the folder ```example``` before the colon in ```example:/workspace/example/``` to the directory of your data.
+```run_daism```is your container name. It is strongly recommended to add -v parameter for implementing data and scripts mounting: mount the local volume ```example``` (from your machine) to ```/workspace/example/``` (to your container) instead of directly copy them into the container.
 
 ### Cell Types Supported
 The example we provide contains the following cell types. The purified dataset for data augmentation can be downloaded from:[https://figshare.com/s/b5737bec1ab6e1502b5a](https://figshare.com/s/b5737bec1ab6e1502b5a)
