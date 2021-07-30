@@ -1,9 +1,8 @@
 ##########################
-##  Training DAISM-DNN  ##
+##  Training DAISM-XMBD  ##
 ##########################
 
 import numpy as np
-import pandas as pd
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -60,12 +59,10 @@ class train_preprocessing():
         self.yve = torch.from_numpy(yve)
         
         if torch.cuda.is_available():
-            self.xtr = self.xtr.cuda(ncuda)
             self.xve = self.xve.cuda(ncuda) 
-            self.ytr = self.ytr.cuda(ncuda)
             self.yve = self.yve.cuda(ncuda) 
             
-class MLP(torch.nn.Module):  
+class MLP_coarse(torch.nn.Module):  
     def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
         super(MLP, self).__init__() 
         # Architectures 
@@ -94,14 +91,43 @@ class MLP(torch.nn.Module):
         y = self.hidden(x)    
         y = self.predict(y)   
         return y
-    
-def evaluate(model,xve,yve,epoch):
+
+class MLP_fine(torch.nn.Module):  
+    def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
+        super(MLP_fine, self).__init__()    
+        L1 = 512
+        L2 = 1024
+        L3 = 512
+        L4 = 128
+        L5 = 32
+        self.hidden = torch.nn.Sequential(                       
+            nn.Linear(INPUT_SIZE, L1),
+            nn.Tanh(),
+            nn.Linear(L1,L2),
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.Linear(L2,L3),
+            nn.Tanh(),
+            nn.Linear(L3,L4),
+            nn.ReLU(),
+            nn.Linear(L4,L5),
+            nn.Tanh(),
+        )
+        self.predict =  torch.nn.Sequential( 
+            nn.Linear(L5, OUTPUT_SIZE),
+        )
+    def forward(self, x):   
+        y = self.hidden(x)   
+        y = self.predict(y)
+        return y
+
+
+def evaluate(model,xve,yve):
     """
     In each epoch, use validation data to evaluate model
     :param model:
     :param xve: validation data (expression)
     :param yve: validation data (fraction)
-    :param epoch:
     :return: mean absolute error of validation data
     """
 
@@ -114,7 +140,7 @@ def evaluate(model,xve,yve,epoch):
 
     return mae_ve
 
-def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0):
+def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0,network="coarse"):
 
     print('Model training start!')
 
@@ -137,9 +163,15 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
     # Model definition
     torch.manual_seed(random_seed)
     torch.cuda.manual_seed_all(random_seed)
-    model = MLP(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
+
+    if network == "coarse":
+        model = MLP_coarse(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
+    if network == "fine":
+        model = MLP_fine(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
+
     if torch.cuda.is_available():
         model = model.cuda(ncuda)  
+
     optimizer = torch.optim.Adam(model.parameters(), lr= lr)  
     loss_func = torch.nn.MSELoss()     
     
@@ -172,14 +204,14 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
         if epoch >= min_epoch:
             if mae_ve[epoch] <= min_mae:
                 min_mae = mae_ve[epoch]
-                torch.save(model.state_dict(), modelpath+'DAISM-DNN_model.pkl')
+                torch.save(model.state_dict(), modelpath+'DAISM_model.pkl')
                 n = 0
             else:
                 n += 1
             if n==10:
                 break
 
-    model.load_state_dict(torch.load(modelpath+'DAISM-DNN_model.pkl'))
+    model.load_state_dict(torch.load(modelpath+'DAISM_model.pkl'))
 
     print("Model training finish!")
 

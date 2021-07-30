@@ -1,5 +1,5 @@
 ######################################
-##  Prediction module of DAISM-DNN  ##
+##  Prediction module of DAISM-XMBD  ##
 ######################################
 
 import os,sys
@@ -10,9 +10,9 @@ from torch.autograd import Variable
 daismdir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0,daismdir)
 
-from daism_dnn.modules.training import MLP,minmaxscaler
+from daism_dnn.modules.training import MLP_coarse,MLP_fine,minmaxscaler
 
-def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
+def dnn_prediction(model, testsam, celltypes, feature,ncuda):
     print("Result prediction start!")
     # preprocess test data
     data = testsam.reindex(feature)   
@@ -32,7 +32,7 @@ def dnn_prediction(model, testsam, celltypes, feature,outdir,ncuda):
     print("Result prediction finish!")
     return pred_result
 
-def model_load(commongene, celltypes, modelpath, outdir, random_seed, ncuda):
+def model_load(commongene, celltypes, modelpath, random_seed, ncuda,network):
     """
     Load trained model
     :param commongene:
@@ -47,7 +47,10 @@ def model_load(commongene, celltypes, modelpath, outdir, random_seed, ncuda):
     torch.cuda.manual_seed_all(random_seed)
 
     # Initialize model
-    model = MLP(INPUT_SIZE = len(commongene),OUTPUT_SIZE = len(celltypes)).double()
+    if network == "coarse":
+        model = MLP_coarse(INPUT_SIZE = len(commongene),OUTPUT_SIZE = len(celltypes)).double()
+    if network == "fine":
+        model = MLP_fine(INPUT_SIZE = len(commongene),OUTPUT_SIZE = len(celltypes)).double()
 
     # Load trained model
     if torch.cuda.is_available():

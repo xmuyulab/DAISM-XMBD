@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='cread purified h5ad file for DAISM
 parser.add_argument("-anno", type=str, help="annotation table (contains 'sample.name' and 'cell.type' two columns)", default=None)
 parser.add_argument("-exp", type=str, help="the whole expression profile (sample.name in column and gene symbol in row)", default=None)
 parser.add_argument("-outdir", type=str, help="the directory to store h5ad file", default="example/")
-
+parser.add_argument("-prefix",type=str,help="the prefix of h5ad file",default= "purified")
 
 def main():
     inputArgs = parser.parse_args()
@@ -52,7 +52,7 @@ def main():
 
     adata = adata[0]
 
-    adata.write(inputArgs.outdir+'/purified.h5ad')
+    adata.write(inputArgs.outdir+'/'+inputArgs.prefix+'.h5ad')
 
 if __name__ == "__main__":
     main()
