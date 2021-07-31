@@ -64,7 +64,7 @@ class train_preprocessing():
             
 class MLP_coarse(torch.nn.Module):  
     def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
-        super(MLP, self).__init__() 
+        super(MLP_coarse, self).__init__() 
         # Architectures 
         L1 = 256
         L2 = 512
@@ -181,6 +181,8 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
         mae_tr=[]
         for step, (batch_x, batch_y) in enumerate(trainloader):
 
+            batch_x = batch_x.cuda(ncuda)
+            batch_y = batch_y.cuda(ncuda)
             model.train()
             optimizer.zero_grad()
             out = model(batch_x)
@@ -200,7 +202,7 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
             optimizer.param_groups[0]['lr'] = lr_min
 
         # early-stopping
-        mae_ve.append(evaluate(model,data.xve,data.yve,epoch))        
+        mae_ve.append(evaluate(model,data.xve,data.yve))        
         if epoch >= min_epoch:
             if mae_ve[epoch] <= min_mae:
                 min_mae = mae_ve[epoch]

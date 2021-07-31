@@ -1,17 +1,17 @@
-## DAISM-DNN
+## DAISM-XMBD
 
-We propose data augmentation through in silico mixing with deep neural networks (DAISM-DNN) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells or single-cell RNA-seq (scRNA-seq) data.
+We propose data augmentation through in silico mixing with deep neural networks (DAISM-XMBD) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells or single-cell RNA-seq (scRNA-seq) data.
 
 A pre-print describing the method is available at bioRxiv:
- [DAISM-DNN: Highly accurate cell type proportion estima-tion within silicodata augmentation and deep neural net-works](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v2)
+ [DAISM-XMBD: Highly accurate cell type proportion estima-tion within silicodata augmentation and deep neural net-works](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v2)
  
 ### Dependencies
 It is recommended to create a new conda environment:
 ```
-conda create -n DAISM_DNN python=3.7
+conda create -n DAISM python=3.7
 
 # Activate this environment:
-conda activate DAISM_DNN
+conda activate DAISM
 ```
 Install the dependencies below:
 ```
@@ -23,8 +23,9 @@ scikit-learn (v0.23.1)
 argh (v0.26.2) 
 anndata (v0.7.3)
 scanpy (v1.5.1)
+tqdm
 ```
-We provide a docker image with DAISM-DNN installed:
+We provide a docker image with DAISM-XMBD installed:
 [https://hub.docker.com/r/zoelin1130/daism_dnn](https://hub.docker.com/r/zoelin1130/daism_dnn)
 
 Pull the docker image:
@@ -48,109 +49,39 @@ pbmc8k.h5ad contains 5 cell types: B.cells, CD4.T.cells, CD8.T.cells, monocytic.
 
 pbmc8k_fine.h5ad contains 11 cell types: naive.B.cells, memory.B.cells, naive.CD4.T.cells, memory.CD4.T.cells,naive.CD8.T.cells, memory.CD8.T.cells, regulatory.T.cells, monocytes, macrophages, myeloid.dendritic.cells, NK.cells.
 
-RNA-seq_TPM.h5ad contains 27 cell types: B.cells, monocytic.lineage, dendritic.cells, naive.CD4.T.cells, NK.cells, macrophage, regulatory.T.cells, naive.B.cells, memory.B.cells, neutrophils, CD4.T.cells, Central.memory.CD4.T.cells, Effector.memory.CD4.T.cells, endothelial.cells, fibroblasts, memory.CD4.T.cells, basophils, myeloid.dendritic.cells, CD8.T.cells, Central.memory.CD8.T.cells, naive.CD8.T.cells, Effector.memory.CD8.T.cells, eosinophils, follicular.helper.T.cells, gamma.delta.T.cells, plasma.cells,memory.CD8.T.cells.
+RNA_TPM_coarse.h5ad contains 5 cell types: B.cells, CD4.T.cells, CD8.T.cells, monocytic.lineage, NK.cells.
 
 Note: each cell type needs to be named according to above format.
 
-DAISM-DNN can support the prediction of any cell types, as long as calibration samples with ground truth and purified expression profiles of corresponding cell types are provided.
+DAISM-XMBD can support the prediction of any cell types, as long as calibration samples with ground truth and purified expression profiles of corresponding cell types are provided.
 
 ### Usage
-In our example below, we set working directory to daism_dnn. Use -h to print out help information on DAISM-DNN modules.
+In our example below, we set working directory to daism. Use -h to print out help information on DAISM-XMBD modules.
 ```
-cd daism_dnn
-python daism_dnn.py -h
-```
-
-DAISM-DNN consists of four modules:
-
-- DAISM-DNN modules: 
-```
-python daism_dnn.py DAISM-DNN -h
-
-python daism_dnn.py DAISM-DNN -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -simNum 16000 -outputDir dir1 -inputExp path4
-
-Required arguments:
-
--platform    string   The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
-                        
--caliExp     string   The calibration samples expression file
-
--caliFra     string   The calibration samples ground truth file
-
--pureExp     string   The purified samples expression (h5ad)
-
--simNum      int      The number of simulation samples
-
--inputExp    string   The test samples expression file
-
--outputDir   string   The directory of result files
+cd daism
+python daism.py -h
 ```
 
-Example: we use [pbmc8k.h5ad](https://figshare.com/s/b5737bec1ab6e1502b5a), a single cell RNA-seq dataset, as purified samples for data augmentation. Put it under the ```example``` directory. The calibration data is an RNA-seq expression profile ```example_caliexp.txt```. So we use ```Rs``` for platform parameter.
+DAISM-XMBD consists of five modules:
 
+- DAISM modules: 
 ```
-python daism_dnn.py DAISM-DNN -platform Rs -caliExp ../example/caliexp.txt -caliFra ../example/califra.txt -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/testexp.txt
+python daism.py DAISM -platform S -caliexp ../example/caliexp.txt -califra ../example/califra.txt -aug ../example/pbmc8k.h5ad -N 16000 -testexp ../example/testexp.txt -net coarse -outdir output/
 ```
-If no calibration samples are available, the training data simulation mode should be changed from ```DAISM``` to ```puremix```.
-
-```
-python daism_dnn.py DAISM-DNN -platform Rs -pureExp ../example/pbmc8k.h5ad -simNum 16000 -outputDir ../output/ -inputExp ../example/testexp.txt
-```
-
+Example: we use [pbmc8k.h5ad](https://figshare.com/s/b5737bec1ab6e1502b5a), a single cell RNA-seq dataset, as purified samples for data augmentation and put it under the ```example``` directory. So we use ```S``` for platform parameter. The calibration data is an RNA-seq expression profile ```caliexp.txt```. And we use coarse network architecture. 
 
 - simulation modules:
+We have two training set simulation modules. One is DAISM_simulation which using DAISM strategy in generating mixtures. 
 ```
-python daism_dnn.py simulation -h
-
-python daism_dnn.py simulation -platform Rs -caliExp path1 -caliFra path2 -pureExp path3 -inputExp path4 -simNum 16000 -outputDir dir1
-
-Required arguments:
-
--platform    string   The platform of [calibration data] + [purified data for augmentation], [Rs]: RNA-seq TPM + scRNA, [Rt]: RNA-seq TPM + TPM, [Ms]: Microarray + scRNA
-
--caliExp     string   The calibration samples expression file
-
--caliFra     string   The calibration samples ground truth file
-
--pureExp     string   The purified samples expression (h5ad)
-
--inputExp    string   The test samples expression file
-
--simNum      int      The number of simulation samples
-
--outputDir   string   The directory of simulated output files
+python daism.py DAISM_simulation -platform S -caliexp ../example/caliexp.txt -califra ../example/califra.txt -aug ../example/pbmc8k.h5ad -N 16000 -testexp ../example/testexp.txt -outdir output/
 ```
+The other is Generic_simulation which generates training set only using purified cells.
 
-- training modules:
 ```
-python daism_dnn.py training -h 
-
-python daism_dnn.py training -trainExp path1 -trainFra path1 -outputDir dir1
-
-Required arguments:
-
--trainExp    string   The simulated samples expression file
-
--trainFra    string   The simulated samples ground truth file
-
--outputDir   string   The directory of output files
+python daism.py Generic_simulation -platform S -aug ../example/pbmc8k.h5ad -N 16000 -testexp ../example/testexp.txt -outdir output/
 ```
 
 - prediction modules:
 ```
-python daism_dnn.py prediction -h 
-
-python daism_dnn.py prediction -inputExp path1 -model path2 -cellType path3 -feature path4 -outputDir dir1
-
-Required arguments:
-
--inputExp   string    The test samples expression file
-
--model      string    The deep-learing model file trained by DAISM-DNN
-
--cellType   string    Model celltypes
-
--feature    string    Model features
-
--outputDir  string    The directory of output result files
+python daism.py prediction -testexp ../example/testexp.txt -model output/DAISM_model.pkl -celltype output/DAISM_celltypes.txt -feature output/DAISM_feature.txt -net coarse -outdir output/
 ```

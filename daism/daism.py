@@ -7,9 +7,9 @@ import argparse
 daismdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,daismdir)
 
-import daism_dnn.modules.simulation as simulation
-import daism_dnn.modules.training as training
-import daism_dnn.modules.prediction as prediction
+import daism.modules.simulation as simulation
+import daism.modules.training as training
+import daism.modules.prediction as prediction
 #--------------------------------------        
 #--------------------------------------        
 
@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description='DAISM-XMBD deconvolution.')
 subparsers = parser.add_subparsers(dest='subcommand', help='Select one of the following sub-commands')
 
 # create the parser for the "one-stop DAISM-DNN" command
-parser_a = subparsers.add_parser('DAISM', help='one-stop DAISM-XMBD')
+parser_a = subparsers.add_parser('DAISM', help='one-stop DAISM-XMBD',description="one-stop DAISM-XMBD")
 #parser_a.add_argument("-cell", type=str, help="The mode of cell types, [C]: Coarse, [F]: Fine", default='C')
 parser_a.add_argument("-platform", type=str, help="Platform of calibration data, [R]: RNA-seq TPM, [S]: single cell RNA-seq", default="S")
 parser_a.add_argument("-caliexp", type=str, help="Calibration samples expression file", default=None)
@@ -31,7 +31,7 @@ parser_a.add_argument("-net", type=str, help="Network architecture used for trai
 parser_a.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 
 # create the parser for the "DAISM simulation" command
-parser_b = subparsers.add_parser('DAISM_simulation', help='simulation')
+parser_b = subparsers.add_parser('DAISM_simulation', help='training set simulation using DAISM strategy',description='training set simulation using DAISM strategy.')
 parser_b.add_argument("-platform", type=str, help="Platform of calibration data, [R]: RNA-seq TPM, [S]: single cell RNA-seq", default="S")
 parser_b.add_argument("-caliexp", type=str, help="Calibration samples expression file", default=None)
 parser_b.add_argument("-califra", type=str, help="Calibration samples ground truth file", default=None)
@@ -41,7 +41,7 @@ parser_b.add_argument("-N", type=int, help="Simulation samples number", default=
 parser_b.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 
 # create the parser for the "Generic simulation" command
-parser_c = subparsers.add_parser('Generic_simulation', help='simulation')
+parser_c = subparsers.add_parser('Generic_simulation', help='training set simulation using purified cells only',description='training set simulation using purified cells only.')
 parser_c.add_argument("-platform", type=str, help="Platform of calibration data, [R]: RNA-seq TPM, [S]: single cell RNA-seq", default="S")
 parser_c.add_argument("-aug", type=str, help="Purified samples expression (h5ad)", default=None)
 parser_c.add_argument("-testexp", type=str, help="Test samples expression file", default=None)
@@ -49,19 +49,19 @@ parser_c.add_argument("-N", type=int, help="Simulation samples number", default=
 parser_c.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 
 # create the parser for the "training" command
-parser_d = subparsers.add_parser('training', help='training')
+parser_d = subparsers.add_parser('training', help='train DNN model',description='train DNN model.')
 parser_d.add_argument("-trainexp", type=str, help="Simulated samples expression file", default=None)
 parser_d.add_argument("-trainfra", type=str, help="Simulated samples ground truth file", default=None)
-parser_a.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
+parser_d.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
 parser_d.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 
 # create the parser for the "prediction" command
-parser_e = subparsers.add_parser('prediction', help='prediction')
+parser_e = subparsers.add_parser('prediction', help='predict using a trained model',description='predict using a trained model.')
 parser_e.add_argument("-testexp", type=str, help="Test samples expression file", default=None)
 parser_e.add_argument("-model", type=str, help="Deep-learing model file trained by DAISM", default="../output/DAISM_model.pkl")
 parser_e.add_argument("-celltype", type=str, help="Model celltypes", default="../output/DAISM_model_celltypes.txt")
 parser_e.add_argument("-feature", type=str, help="Model feature", default="../output/DAISM_model_feature.txt")
-parser_a.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
+parser_e.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
 parser_e.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 
 
@@ -95,10 +95,11 @@ def main():
         test_sample = pd.read_csv(inputArgs.testexp, sep="\t", index_col=0)
 
         # Preprocess purified data
+        mode = "daism"
         commongenes,caliexp,C_all = simulation.preprocess_purified(inputArgs.aug,inputArgs.platform,mode,test_sample,caliexp,califra)
 
         # Create training dataset
-        mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.N,inputArgs.platform,commongenes,Options.min_f,Options.max_f)
+        mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.N,inputArgs.platform,Options.min_f,Options.max_f)
 
         # Save signature genes and celltype labels
         pd.DataFrame(feature).to_csv(inputArgs.outdir+'/DAISM_feature.txt',sep='\t')
@@ -117,7 +118,7 @@ def main():
         pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/DAISM_model_feature.txt',sep='\t')
 
         # Prediction
-        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),inputArgs.outdir,Options.ncuda,inputArgs.net)
+        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),Options.ncuda,inputArgs.net)
 
         # Save predicted result
         result.to_csv(inputArgs.outdir+'/DAISM_result.txt',sep='\t')
@@ -142,7 +143,7 @@ def main():
         commongenes,caliexp,C_all = simulation.preprocess_purified(inputArgs.aug,inputArgs.platform,mode,test_sample,caliexp,califra)
 
         # Create training dataset
-        mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.N,inputArgs.platform,commongenes,Options.min_f,Options.max_f)
+        mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.N,inputArgs.platform,Options.min_f,Options.max_f)
             
         # Save signature genes and celltype labels
         pd.DataFrame(feature).to_csv(inputArgs.outdir+'/DAISM_feature.txt',sep='\t')
@@ -206,10 +207,10 @@ def main():
         celltypes = pd.read_csv(inputArgs.celltype,sep='\t')['0']
         
         # Load trained model
-        model = prediction.model_load(feature, celltypes, inputArgs.model, inputArgs.outdir, Options.random_seed,Options.ncuda,inputArgs.net)
+        model = prediction.model_load(feature, celltypes, inputArgs.model, Options.random_seed,Options.ncuda,inputArgs.net)
 
         # Prediction
-        result = prediction.dnn_prediction(model, test_sample, celltypes, feature,inputArgs.outdir,Options.ncuda)
+        result = prediction.dnn_prediction(model, test_sample, celltypes, feature,Options.ncuda)
 
         # Save predicted result
         result.to_csv(inputArgs.outdir+'/DAISM_result.txt',sep='\t')

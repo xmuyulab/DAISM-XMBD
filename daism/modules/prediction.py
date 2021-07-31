@@ -10,7 +10,7 @@ from torch.autograd import Variable
 daismdir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0,daismdir)
 
-from daism_dnn.modules.training import MLP_coarse,MLP_fine,minmaxscaler
+from daism.modules.training import MLP_coarse,MLP_fine,minmaxscaler
 
 def dnn_prediction(model, testsam, celltypes, feature,ncuda):
     print("Result prediction start!")

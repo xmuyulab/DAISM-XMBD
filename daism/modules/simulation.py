@@ -10,7 +10,7 @@ import random
 import scanpy as sc
 import anndata
 import math
-import tqdm
+from tqdm import tqdm
 
 def sc_norm(exp,counts_per_cell_after):
     """
