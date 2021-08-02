@@ -12,6 +12,7 @@ sys.path.insert(0,daismdir)
 
 from daism.modules.training import MLP_coarse,MLP_fine,minmaxscaler
 
+
 def dnn_prediction(model, testsam, celltypes, feature,ncuda):
     print("Result prediction start!")
     # preprocess test data

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os,sys
-import numpy as np
 import pandas as pd
 import argparse
 
@@ -10,6 +9,7 @@ sys.path.insert(0,daismdir)
 import daism.modules.simulation as simulation
 import daism.modules.training as training
 import daism.modules.prediction as prediction
+
 #--------------------------------------        
 #--------------------------------------        
 
@@ -20,7 +20,6 @@ subparsers = parser.add_subparsers(dest='subcommand', help='Select one of the fo
 
 # create the parser for the "one-stop DAISM-DNN" command
 parser_a = subparsers.add_parser('DAISM', help='one-stop DAISM-XMBD',description="one-stop DAISM-XMBD")
-#parser_a.add_argument("-cell", type=str, help="The mode of cell types, [C]: Coarse, [F]: Fine", default='C')
 parser_a.add_argument("-platform", type=str, help="Platform of calibration data, [R]: RNA-seq TPM, [S]: single cell RNA-seq", default="S")
 parser_a.add_argument("-caliexp", type=str, help="Calibration samples expression file", default=None)
 parser_a.add_argument("-califra", type=str, help="Calibration samples ground truth file", default=None)
@@ -102,26 +101,29 @@ def main():
         mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.N,inputArgs.platform,Options.min_f,Options.max_f)
 
         # Save signature genes and celltype labels
-        pd.DataFrame(feature).to_csv(inputArgs.outdir+'/DAISM_feature.txt',sep='\t')
-        pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/DAISM_celltypes.txt',sep='\t')
+        if os.path.exists(inputArgs.outdir+"/output/")==False:
+                os.mkdir(inputArgs.outdir+"/output/")
+
+        pd.DataFrame(feature).to_csv(inputArgs.outdir+'/output/DAISM_feature.txt',sep='\t')
+        pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/output/DAISM_celltypes.txt',sep='\t')
 
         print('Writing training data...')
         # Save training data
-        mixsam.to_csv(inputArgs.outdir+'/DAISM_mixsam.txt',sep='\t')
-        mixfra.to_csv(inputArgs.outdir+'/DAISM_mixfra.txt',sep='\t')
+        mixsam.to_csv(inputArgs.outdir+'/output/DAISM_mixsam.txt',sep='\t')
+        mixfra.to_csv(inputArgs.outdir+'/output/DAISM_mixfra.txt',sep='\t')
         
         # Training model
-        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir,Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda,inputArgs.net)
+        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda,inputArgs.net)
 
         # Save signature genes and celltype labels
-        pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outdir+'/DAISM_model_celltypes.txt',sep='\t')
-        pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/DAISM_model_feature.txt',sep='\t')
+        pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_celltypes.txt',sep='\t')
+        pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_feature.txt',sep='\t')
 
         # Prediction
         result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),Options.ncuda)
 
         # Save predicted result
-        result.to_csv(inputArgs.outdir+'/DAISM_result.txt',sep='\t')
+        result.to_csv(inputArgs.outdir+'/output/DAISM_result.txt',sep='\t')
     
     ############################
     #### simulation modules ####
@@ -146,13 +148,16 @@ def main():
         mixsam, mixfra, celltypes, feature = simulation.daism_simulation(caliexp,califra,C_all,Options.random_seed,inputArgs.N,inputArgs.platform,Options.min_f,Options.max_f)
             
         # Save signature genes and celltype labels
-        pd.DataFrame(feature).to_csv(inputArgs.outdir+'/DAISM_feature.txt',sep='\t')
-        pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/DAISM_celltypes.txt',sep='\t')
+        if os.path.exists(inputArgs.outdir+"/output/")==False:
+                os.mkdir(inputArgs.outdir+"/output/")
+
+        pd.DataFrame(feature).to_csv(inputArgs.outdir+'/output/DAISM_feature.txt',sep='\t')
+        pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/output/DAISM_celltypes.txt',sep='\t')
 
         print('Writing training data...')
         # Save training data
-        mixsam.to_csv(inputArgs.outdir+'/DAISM_mixsam.txt',sep='\t')
-        mixfra.to_csv(inputArgs.outdir+'/DAISM_mixfra.txt',sep='\t')
+        mixsam.to_csv(inputArgs.outdir+'/output/DAISM_mixsam.txt',sep='\t')
+        mixfra.to_csv(inputArgs.outdir+'/output/DAISM_mixfra.txt',sep='\t')
     
     #### Generic simulation modules ####
 
@@ -169,13 +174,16 @@ def main():
         mixsam, mixfra, celltypes, feature = simulation.generic_simulation(C_all,Options.random_seed,inputArgs.N,inputArgs.platform,commongenes)
             
         # Save signature genes and celltype labels
-        pd.DataFrame(feature).to_csv(inputArgs.outdir+'/Generic_feature.txt',sep='\t')
-        pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/Generic_celltypes.txt',sep='\t')
+        if os.path.exists(inputArgs.outdir+"/output/")==False:
+                os.mkdir(inputArgs.outdir+"/output/")
+
+        pd.DataFrame(feature).to_csv(inputArgs.outdir+'/output/Generic_feature.txt',sep='\t')
+        pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/output/Generic_celltypes.txt',sep='\t')
 
         print('Writing training data...')
         # Save training data
-        mixsam.to_csv(inputArgs.outdir+'/Generic_mixsam.txt',sep='\t')
-        mixfra.to_csv(inputArgs.outdir+'/Generic_mixfra.txt',sep='\t')
+        mixsam.to_csv(inputArgs.outdir+'/output/Generic_mixsam.txt',sep='\t')
+        mixfra.to_csv(inputArgs.outdir+'/output/Generic_mixfra.txt',sep='\t')
 
 
     ##########################
@@ -188,11 +196,14 @@ def main():
         mixfra = pd.read_csv(inputArgs.trainfra, sep="\t", index_col=0)
 
         # Training model
-        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir,Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda,inputArgs.net)
+        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda,inputArgs.net)
 
         # Save signature genes and celltype labels
-        pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outdir+'/DAISM_model_celltypes.txt',sep='\t')
-        pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/DAISM_model_feature.txt',sep='\t')
+        if os.path.exists(inputArgs.outdir+"/output/")==False:
+                os.mkdir(inputArgs.outdir+"/output/")
+
+        pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_celltypes.txt',sep='\t')
+        pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_feature.txt',sep='\t')
 
     ############################
     #### prediction modules ####
@@ -213,7 +224,10 @@ def main():
         result = prediction.dnn_prediction(model, test_sample, celltypes, feature,Options.ncuda)
 
         # Save predicted result
-        result.to_csv(inputArgs.outdir+'/DAISM_result.txt',sep='\t')
+        if os.path.exists(inputArgs.outdir+"/output/")==False:
+                os.mkdir(inputArgs.outdir+"/output/")
+
+        result.to_csv(inputArgs.outdir+'/output/DAISM_result.txt',sep='\t')
 
 
 if __name__ == "__main__":

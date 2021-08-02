@@ -9,3 +9,4 @@ conda install scikit-learn
 #pip install sklearn
 pip install scanpy
 pip install tqdm
+pip install daism
