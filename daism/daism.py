@@ -118,7 +118,7 @@ def main():
         pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/DAISM_model_feature.txt',sep='\t')
 
         # Prediction
-        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),Options.ncuda,inputArgs.net)
+        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),Options.ncuda)
 
         # Save predicted result
         result.to_csv(inputArgs.outdir+'/DAISM_result.txt',sep='\t')
