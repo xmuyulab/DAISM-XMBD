@@ -1,9 +1,9 @@
-# DAISM-XMBD
+# DAISM-DNN
 
-We propose data augmentation through in silico mixing with deep neural networks (DAISM-XMBD) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells or single-cell RNA-seq (scRNA-seq) data.
+We propose data augmentation through in silico mixing with deep neural networks (DAISM-DNN) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of calibration samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells, single-cell RNA-seq (scRNA-seq) data or CITE-seq data.
 
 A pre-print describing the method is available at bioRxiv:
- [DAISM-XMBD: Highly accurate cell type proportion estimation within silico data augmentation and deep neural networks](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v2)
+ [DAISM-DNN: Highly accurate cell type proportion estimation within silico data augmentation and deep neural networks](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v2)
  
 ## Installation
 ### Pip
@@ -20,7 +20,7 @@ And run the following command to install daism via pip:
 pip install daism
 ```
 
-The main dependencies list below:
+The main dependencies listing below will be installed with daism.
 ```
 python (v3.7.7)
 torch (v1.5.1)
@@ -34,7 +34,7 @@ tqdm (v4.46.0)
 ```
 
 ### Docker
-We provide a docker image with DAISM-XMBD installed:
+We provide a docker image with DAISM-DNN installed:
 [https://hub.docker.com/r/zoelin1130/daism](https://hub.docker.com/r/zoelin1130/daism)
 
 Pull the docker image:
@@ -62,10 +62,10 @@ RNA_TPM_coarse.h5ad contains 5 cell types: B.cells, CD4.T.cells, CD8.T.cells, mo
 
 Note: each cell type needs to be named according to above format.
 
-DAISM-XMBD can support the prediction of any cell types, as long as calibration samples with ground truth and purified expression profiles of corresponding cell types are provided.
+DAISM-DNN can support the prediction of any cell types, as long as calibration samples with ground truth and purified expression profiles of corresponding cell types are provided.
 
 ## Usage
-In our example below, we set working directory to daism. Use -h to print out help information on DAISM-XMBD modules.
+In our example below, we set working directory to daism. Use -h to print out help information on DAISM-DNN modules.
 ```
 # If you git clone the repository to local, you can use the following command.
 cd daism
@@ -75,13 +75,13 @@ python daism.py -h
 daism -h
 ```
 
-DAISM-XMBD consists of four modules:
+DAISM-DNN consists of four modules:
 ### DAISM modules: 
 ```
 daism DAISM -platform S -caliexp ../example/caliexp.txt -califra ../example/califra.txt -aug ../example/pbmc8k.h5ad -N 16000 -testexp ../example/testexp.txt -net coarse -outdir output/
 ```
 
-```DAISM``` is a one-stop mode to run DAISM-XMBD, which integrates simulation, training and prediction in one module. 
+```DAISM``` is a one-stop mode to run DAISM-DNN, which integrates simulation, training and prediction in one module. 
 Example: we use [pbmc8k.h5ad](https://figshare.com/s/3c230f06565e0a1cccc1), a single cell RNA-seq dataset, as purified samples for data augmentation and put it under the ```example``` directory. So we use ```S``` for platform parameter. The calibration data is an RNA-seq expression profile ```caliexp.txt```. And we use coarse network architecture. (We have two network architectures, namely ```coarse``` and ```fine```.)
 
 ### simulation modules:
