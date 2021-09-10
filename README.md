@@ -106,6 +106,6 @@ daism training -trainexp ./output/Generic_mixsam.txt -trainfra ./output/Generic_
 We use the DAISM-generated mixtures ```DAISM_mixsam.txt``` and corresponding artificial cell fractions ```DAISM_mixfra.txt``` to train the neural networks.
 ### prediction modules:
 ```
-daism prediction -testexp ../example/testexp.txt -model ./output/DAISM_model.pkl -celltype ./output/DAISM_celltypes.txt -feature ./output/DAISM_feature.txt -net coarse -outdir ./
+daism prediction -testexp ../example/testexp.txt -model ./output/DAISM_model.pkl -celltype ./output/DAISM_model_celltypes.txt -feature ./output/DAISM_model_feature.txt -net coarse -outdir ./
 ```
 Both the result file and the process files will be saved in the ```output``` folder.
