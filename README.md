@@ -1,5 +1,8 @@
 # DAISM-DNN
 
+<div align=center><img src="./logo.jpg" width="50%" height="50%" ></div>
+&nbsp;
+
 We propose data augmentation through in silico mixing with deep neural networks (DAISM-DNN) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of calibration samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells, single-cell RNA-seq (scRNA-seq) data or CITE-seq data.
 
 A pre-print describing the method is available at bioRxiv:
