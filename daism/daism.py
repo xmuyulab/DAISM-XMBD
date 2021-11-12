@@ -26,8 +26,9 @@ parser_a.add_argument("-califra", type=str, help="Calibration samples ground tru
 parser_a.add_argument("-aug", type=str, help="Purified samples expression (h5ad)", default=None)
 parser_a.add_argument("-N", type=int, help="Simulation samples number", default=16000)
 parser_a.add_argument("-testexp", type=str, help="Test samples expression file", default=None)
-parser_a.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
 parser_a.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
+parser_a.add_argument("-ncuda", type=int, help="No. GPU", default=0)
+parser_a.add_argument("-write", action ="store_true", help="write data to disk", default=False)
 
 # create the parser for the "DAISM simulation" command
 parser_b = subparsers.add_parser('DAISM_simulation', help='training set simulation using DAISM strategy',description='training set simulation using DAISM strategy.')
@@ -51,8 +52,8 @@ parser_c.add_argument("-outdir", type=str, help="Output result file directory", 
 parser_d = subparsers.add_parser('training', help='train DNN model',description='train DNN model.')
 parser_d.add_argument("-trainexp", type=str, help="Simulated samples expression file", default=None)
 parser_d.add_argument("-trainfra", type=str, help="Simulated samples ground truth file", default=None)
-parser_d.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
 parser_d.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
+parser_d.add_argument("-ncuda", type=int, help="No. GPU", default=0)
 
 # create the parser for the "prediction" command
 parser_e = subparsers.add_parser('prediction', help='predict using a trained model',description='predict using a trained model.')
@@ -60,8 +61,8 @@ parser_e.add_argument("-testexp", type=str, help="Test samples expression file",
 parser_e.add_argument("-model", type=str, help="Deep-learing model file trained by DAISM", default="../output/DAISM_model.pkl")
 parser_e.add_argument("-celltype", type=str, help="Model celltypes", default="../output/DAISM_model_celltypes.txt")
 parser_e.add_argument("-feature", type=str, help="Model feature", default="../output/DAISM_model_feature.txt")
-parser_e.add_argument("-net", type=str, help="Network architecture used for training", default="coarse")
 parser_e.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
+parser_e.add_argument("-ncuda", type=int, help="No. GPU", default=0)
 
 
 class Options:
@@ -71,7 +72,6 @@ class Options:
     lr = 1e-4
     batchsize = 64
     num_epoches = 500
-    ncuda = 0
 
 
 def main():
@@ -109,18 +109,19 @@ def main():
 
         print('Writing training data...')
         # Save training data
-        mixsam.to_csv(inputArgs.outdir+'/output/DAISM_mixsam.txt',sep='\t')
-        mixfra.to_csv(inputArgs.outdir+'/output/DAISM_mixfra.txt',sep='\t')
+        if inputArgs.write==True:
+            mixsam.to_csv(inputArgs.outdir+'/output/DAISM_mixsam.txt',sep='\t')
+            mixfra.to_csv(inputArgs.outdir+'/output/DAISM_mixfra.txt',sep='\t')
         
         # Training model
-        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda,inputArgs.net)
+        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,inputArgs.ncuda)
 
         # Save signature genes and celltype labels
         pd.DataFrame(list(mixfra.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_celltypes.txt',sep='\t')
         pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_feature.txt',sep='\t')
 
         # Prediction
-        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),Options.ncuda)
+        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),inputArgs.ncuda)
 
         # Save predicted result
         result.to_csv(inputArgs.outdir+'/output/DAISM_result.txt',sep='\t')
@@ -196,7 +197,7 @@ def main():
         mixfra = pd.read_csv(inputArgs.trainfra, sep="\t", index_col=0)
 
         # Training model
-        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,Options.ncuda,inputArgs.net)
+        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,inputArgs.ncuda)
 
         # Save signature genes and celltype labels
         if os.path.exists(inputArgs.outdir+"/output/")==False:
@@ -218,10 +219,10 @@ def main():
         celltypes = pd.read_csv(inputArgs.celltype,sep='\t')['0']
         
         # Load trained model
-        model = prediction.model_load(feature, celltypes, inputArgs.model, Options.random_seed,Options.ncuda,inputArgs.net)
+        model = prediction.model_load(feature, celltypes, inputArgs.model, Options.random_seed,inputArgs.ncuda)
 
         # Prediction
-        result = prediction.dnn_prediction(model, test_sample, celltypes, feature,Options.ncuda)
+        result = prediction.dnn_prediction(model, test_sample, celltypes, feature,inputArgs.ncuda)
 
         # Save predicted result
         if os.path.exists(inputArgs.outdir+"/output/")==False:

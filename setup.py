@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = "1.0.5"
+version = "2.0.0"
 
 
 with open("LICENSE", encoding="UTF-8") as f:
@@ -11,7 +11,7 @@ with open("LICENSE", encoding="UTF-8") as f:
 setup(
     name="daism",
     version=version,
-    description="Highly accurate cell type proportion estima-tion within silicodata augmentation and deep neural net-works",
+    description="Highly accurate cell type proportion estimation within silicodata augmentation and deep neural net-works",
     keywords=[
         "bioinformatics",
         "data augmentation",

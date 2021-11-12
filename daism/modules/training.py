@@ -62,65 +62,30 @@ class train_preprocessing():
             self.xve = self.xve.cuda(ncuda) 
             self.yve = self.yve.cuda(ncuda) 
             
-class MLP_coarse(torch.nn.Module):  
+
+class MLP(torch.nn.Module):  
     def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
-        super(MLP_coarse, self).__init__() 
+        super(MLP, self).__init__() 
         # Architectures 
-        L1 = 256
+        L1 = 1024
         L2 = 512
-        L3 = 128
-        L4 = 32
-        L5 = 16
+        L3 = 256
         self.hidden = torch.nn.Sequential(                       
             nn.Linear(INPUT_SIZE, L1),
-            nn.Tanh(),
+            nn.ReLU(),
             nn.Linear(L1,L2),
             nn.BatchNorm1d(L2),
             nn.ReLU(),
             nn.Linear(L2,L3),
-            nn.Tanh(),
-            nn.Linear(L3,L4),
             nn.ReLU(),
-            nn.Linear(L4,L5),
-            nn.Tanh(),
         )
         self.predict =  torch.nn.Sequential( 
-            nn.Linear(L5, OUTPUT_SIZE),
+            nn.Linear(L3, OUTPUT_SIZE),
         )
     def forward(self, x):   
         y = self.hidden(x)    
         y = self.predict(y)   
         return y
-
-class MLP_fine(torch.nn.Module):  
-    def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
-        super(MLP_fine, self).__init__()    
-        L1 = 512
-        L2 = 1024
-        L3 = 512
-        L4 = 128
-        L5 = 32
-        self.hidden = torch.nn.Sequential(                       
-            nn.Linear(INPUT_SIZE, L1),
-            nn.Tanh(),
-            nn.Linear(L1,L2),
-            nn.Dropout(0.2),
-            nn.ReLU(),
-            nn.Linear(L2,L3),
-            nn.Tanh(),
-            nn.Linear(L3,L4),
-            nn.ReLU(),
-            nn.Linear(L4,L5),
-            nn.Tanh(),
-        )
-        self.predict =  torch.nn.Sequential( 
-            nn.Linear(L5, OUTPUT_SIZE),
-        )
-    def forward(self, x):   
-        y = self.hidden(x)   
-        y = self.predict(y)
-        return y
-
 
 def evaluate(model,xve,yve):
     """
@@ -140,7 +105,7 @@ def evaluate(model,xve,yve):
 
     return mae_ve
 
-def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0,network="coarse"):
+def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0):
 
     print('Model training start!')
 
@@ -164,10 +129,7 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
     torch.manual_seed(random_seed)
     torch.cuda.manual_seed_all(random_seed)
 
-    if network == "coarse":
-        model = MLP_coarse(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
-    if network == "fine":
-        model = MLP_fine(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
+    model = MLP(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
 
     if torch.cuda.is_available():
         model = model.cuda(ncuda)  

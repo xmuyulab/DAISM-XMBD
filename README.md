@@ -42,15 +42,15 @@ We provide a docker image with DAISM-DNN installed:
 
 Pull the docker image:
 ```
-docker pull zoelin1130/daism:1.0
+docker pull zoelin1130/daism:2.0
 ```
 Create a container (GPU):
 ```
-docker run --gpus all -i -t --name run_daism -v example/:/workspace/example/ zoelin1130/daism:1.0 /bin/bash
+docker run --gpus all -i -t --name run_daism -v example/:/workspace/example/ zoelin1130/daism:2.0 /bin/bash
 ```
 Create a container (CPU):
 ```
-docker run -i -t --name run_daism -v example/:/workspace/example/ zoelin1130/daism:1.0 /bin/bash
+docker run -i -t --name run_daism -v example/:/workspace/example/ zoelin1130/daism:2.0 /bin/bash
 ```
 ```run_daism```is your container name. It is strongly recommended to add -v parameter for implementing data and scripts mounting: mount the local volume ```example``` (from your machine) to ```/workspace/example/``` (to your container) instead of directly copy them into the container.
 
@@ -81,11 +81,11 @@ daism -h
 DAISM-DNN consists of four modules:
 ### DAISM modules: 
 ```
-daism DAISM -platform S -caliexp ../example/caliexp.txt -califra ../example/califra.txt -aug ../example/pbmc8k.h5ad -N 16000 -testexp ../example/testexp.txt -net coarse -outdir output/
+daism DAISM -platform S -caliexp ../example/caliexp.txt -califra ../example/califra.txt -aug ../example/pbmc8k.h5ad -N 16000 -testexp ../example/testexp.txt -outdir ./
 ```
 
 ```DAISM``` is a one-stop mode to run DAISM-DNN, which integrates simulation, training and prediction in one module. 
-Example: we use [pbmc8k.h5ad](https://figshare.com/s/3c230f06565e0a1cccc1), a single cell RNA-seq dataset, as purified samples for data augmentation and put it under the ```example``` directory. So we use ```S``` for platform parameter. The calibration data is an RNA-seq expression profile ```caliexp.txt```. And we use coarse network architecture. (We have two network architectures, namely ```coarse``` and ```fine```.)
+Example: we use [pbmc8k.h5ad](https://figshare.com/s/3c230f06565e0a1cccc1), a single cell RNA-seq dataset, as purified samples for data augmentation and put it under the ```example``` directory. So we use ```S``` for platform parameter. The calibration data is an RNA-seq expression profile ```caliexp.txt```.
 
 ### simulation modules:
   
@@ -101,14 +101,14 @@ daism Generic_simulation -platform S -aug ../example/pbmc8k.h5ad -N 16000 -teste
 ### training modules:
 ```
 # If you use DAISM_simulation mode:
-daism training -trainexp ./output/DAISM_mixsam.txt -trainfra ./output/DAISM_mixfra.txt -net coarse -outdir ./
+daism training -trainexp ./output/DAISM_mixsam.txt -trainfra ./output/DAISM_mixfra.txt -outdir ./
 
 # If you use Generic_simulation mode:
-daism training -trainexp ./output/Generic_mixsam.txt -trainfra ./output/Generic_mixfra.txt -net coarse -outdir ./
+daism training -trainexp ./output/Generic_mixsam.txt -trainfra ./output/Generic_mixfra.txt -outdir ./
 ```
 We use the DAISM-generated mixtures ```DAISM_mixsam.txt``` and corresponding artificial cell fractions ```DAISM_mixfra.txt``` to train the neural networks.
 ### prediction modules:
 ```
-daism prediction -testexp ../example/testexp.txt -model ./output/DAISM_model.pkl -celltype ./output/DAISM_model_celltypes.txt -feature ./output/DAISM_model_feature.txt -net coarse -outdir ./
+daism prediction -testexp ../example/testexp.txt -model ./output/DAISM_model.pkl -celltype ./output/DAISM_model_celltypes.txt -feature ./output/DAISM_model_feature.txt -outdir ./
 ```
 Both the result file and the process files will be saved in the ```output``` folder.

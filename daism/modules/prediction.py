@@ -10,7 +10,7 @@ from torch.autograd import Variable
 daismdir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0,daismdir)
 
-from daism.modules.training import MLP_coarse,MLP_fine,minmaxscaler
+from daism.modules.training import MLP,minmaxscaler
 
 
 def dnn_prediction(model, testsam, celltypes, feature,ncuda):
@@ -48,10 +48,7 @@ def model_load(commongene, celltypes, modelpath, random_seed, ncuda,network):
     torch.cuda.manual_seed_all(random_seed)
 
     # Initialize model
-    if network == "coarse":
-        model = MLP_coarse(INPUT_SIZE = len(commongene),OUTPUT_SIZE = len(celltypes)).double()
-    if network == "fine":
-        model = MLP_fine(INPUT_SIZE = len(commongene),OUTPUT_SIZE = len(celltypes)).double()
+    model = MLP(INPUT_SIZE = len(commongene),OUTPUT_SIZE = len(celltypes)).double()
 
     # Load trained model
     if torch.cuda.is_available():
