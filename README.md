@@ -6,7 +6,7 @@
 We propose data augmentation through in silico mixing with deep neural networks (DAISM-DNN) to achieve highly accurate and unbiased immune-cell proportion estimation from bulk  RNA sequencing (RNA-seq) data. Our method tackles the batch effect problem by creating a data-specific training dataset from a small subset of calibration samples with ground truth cell proportions which is further augmented with publicly available RNA-seq data from purified cells, single-cell RNA-seq (scRNA-seq) data or CITE-seq data.
 
 A pre-print describing the method is available at bioRxiv:
- [DAISM-DNN^XMBD: Highly accurate cell type proportion estimation with in silico data augmentation and deep neural networks](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v3)
+ [DAISM-DNN<sup>XMBD</sup>: Highly accurate cell type proportion estimation with in silico data augmentation and deep neural networks](https://www.biorxiv.org/content/10.1101/2020.03.26.009308v3)
  
 ## Installation
 ### Pip
@@ -112,3 +112,6 @@ We use the DAISM-generated mixtures ```DAISM_mixsam.txt``` and corresponding art
 daism prediction -testexp ../example/testexp.txt -model ./output/DAISM_model.pkl -celltype ./output/DAISM_model_celltypes.txt -feature ./output/DAISM_model_feature.txt -outdir ./
 ```
 Both the result file and the process files will be saved in the ```output``` folder.
+
+## Citation
+Lin Y, Li H, Xiao X, et al. DAISM-DNN<sup>XMBD</sup>: Highly accurate cell type proportion estimation with in silico data augmentation and deep neural networks. Patterns (2022) https://doi.org/10.1016/j.patter.2022.100440
