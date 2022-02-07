@@ -33,7 +33,7 @@ def dnn_prediction(model, testsam, celltypes, feature,ncuda):
     print("Result prediction finish!")
     return pred_result
 
-def model_load(commongene, celltypes, modelpath, random_seed, ncuda,network):
+def model_load(commongene, celltypes, modelpath, random_seed, ncuda):
     """
     Load trained model
     :param commongene:
