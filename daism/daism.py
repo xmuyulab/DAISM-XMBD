@@ -10,6 +10,8 @@ import daism.modules.simulation as simulation
 import daism.modules.training as training
 import daism.modules.prediction as prediction
 
+import random
+
 #--------------------------------------        
 #--------------------------------------        
 
@@ -54,6 +56,8 @@ parser_d.add_argument("-trainexp", type=str, help="Simulated samples expression 
 parser_d.add_argument("-trainfra", type=str, help="Simulated samples ground truth file", default=None)
 parser_d.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 parser_d.add_argument("-ncuda", type=int, help="No. GPU", default=0)
+parser_d.add_argument("-sum2one", action ="store_true", help="Make the output fraction sum to one", default=False)
+parser_d.add_argument("-p", action ="store_true", help="Whether to report the performance of trained model on training and validation set", default=False)
 
 # create the parser for the "prediction" command
 parser_e = subparsers.add_parser('prediction', help='predict using a trained model',description='predict using a trained model.')
@@ -63,6 +67,21 @@ parser_e.add_argument("-celltype", type=str, help="Model celltypes", default="..
 parser_e.add_argument("-feature", type=str, help="Model feature", default="../output/DAISM_model_feature.txt")
 parser_e.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 parser_e.add_argument("-ncuda", type=int, help="No. GPU", default=0)
+parser_e.add_argument("-sum2one", action ="store_true", help="Make the output fraction sum to one", default=False)
+
+# create the parser for the "split" command
+parser_f = subparsers.add_parser('split', help='split calibration samples',description="split calibration samples")
+parser_f.add_argument("-caliexp", type=str, help="Calibration samples expression file", default=None)
+parser_f.add_argument("-califra", type=str, help="Calibration samples ground truth file", default=None)
+parser_f.add_argument("-seed", type=str, help="Random seed", default=777)
+parser_f.add_argument("-n", type=int, help="Size of hold-out samples", default=6)
+parser_f.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
+
+# create the parser for the "performance evaluation" command
+parser_g = subparsers.add_parser('metrics', help='performance evaluation',description="performance evaluation")
+parser_g.add_argument("-pred", type=str, help="Predicted fractions file", default=None)
+parser_g.add_argument("-gt", type=str, help="Ground truth cell proportions file", default=None)
+parser_g.add_argument("-outdir", type=str, help="Output result file directory", default="../output/")
 
 
 class Options:
@@ -81,8 +100,9 @@ def main():
     if os.path.exists(inputArgs.outdir)==False:
         os.mkdir(inputArgs.outdir)
 
-
+    #######################
     #### DAISM modules ####
+    #######################
 
     if (inputArgs.subcommand=='DAISM'):
 
@@ -107,9 +127,9 @@ def main():
         pd.DataFrame(feature).to_csv(inputArgs.outdir+'/output/DAISM_feature.txt',sep='\t')
         pd.DataFrame(celltypes).to_csv(inputArgs.outdir+'/output/DAISM_celltypes.txt',sep='\t')
 
-        print('Writing training data...')
         # Save training data
         if inputArgs.write==True:
+            print('Writing training data...')
             mixsam.to_csv(inputArgs.outdir+'/output/DAISM_mixsam.txt',sep='\t')
             mixfra.to_csv(inputArgs.outdir+'/output/DAISM_mixfra.txt',sep='\t')
         
@@ -121,7 +141,7 @@ def main():
         pd.DataFrame(list(mixsam.index)).to_csv(inputArgs.outdir+'/output/DAISM_model_feature.txt',sep='\t')
 
         # Prediction
-        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index),inputArgs.ncuda)
+        result = prediction.dnn_prediction(model, test_sample, list(mixfra.index), list(mixsam.index), inputArgs.ncuda)
 
         # Save predicted result
         result.to_csv(inputArgs.outdir+'/output/DAISM_result.txt',sep='\t')
@@ -197,7 +217,7 @@ def main():
         mixfra = pd.read_csv(inputArgs.trainfra, sep="\t", index_col=0)
 
         # Training model
-        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,inputArgs.ncuda)
+        model = training.dnn_training(mixsam,mixfra,Options.random_seed,inputArgs.outdir+"/output/",Options.num_epoches,Options.lr,Options.batchsize,inputArgs.ncuda,inputArgs.sum2one,inputArgs.p)
 
         # Save signature genes and celltype labels
         if os.path.exists(inputArgs.outdir+"/output/")==False:
@@ -219,7 +239,7 @@ def main():
         celltypes = pd.read_csv(inputArgs.celltype,sep='\t')['0']
         
         # Load trained model
-        model = prediction.model_load(feature, celltypes, inputArgs.model, Options.random_seed,inputArgs.ncuda)
+        model = prediction.model_load(feature, celltypes, inputArgs.model, Options.random_seed,inputArgs.ncuda,inputArgs.sum2one)
 
         # Prediction
         result = prediction.dnn_prediction(model, test_sample, celltypes, feature,inputArgs.ncuda)
@@ -230,6 +250,44 @@ def main():
 
         result.to_csv(inputArgs.outdir+'/output/DAISM_result.txt',sep='\t')
 
+    #######################
+    #### split modules ####
+    #######################
+    if (inputArgs.subcommand=='split'):
+        
+        # Load calibration data
+        caliexp = pd.read_csv(inputArgs.caliexp, sep="\t", index_col=0)
+        califra = pd.read_csv(inputArgs.califra, sep="\t", index_col=0)
+
+        sample_list = list(caliexp.columns)
+
+        if inputArgs.n <= 0:
+            print("Please enter a positive number (>5 recommended)")
+        else:
+            random.seed(inputArgs.seed)
+            sample_holdout = random.sample(sample_list,inputArgs.n)
+            holdout_exp = caliexp[sample_holdout]
+            holdout_fra = califra[sample_holdout]
+
+            cali_data = pd.DataFrame(caliexp.drop(columns=sample_holdout,inplace=False))
+            cali_fra = pd.DataFrame(califra.drop(columns=sample_holdout,inplace=False))
+
+            holdout_exp.to_csv(inputArgs.outdir+'hold_out_exp.txt',sep='\t')
+            holdout_fra.to_csv(inputArgs.outdir+'hold_out_fra.txt',sep='\t')
+            cali_data.to_csv(inputArgs.outdir+'rest_cali_exp.txt',sep='\t')
+            cali_fra.to_csv(inputArgs.outdir+'rest_cali_fra.txt',sep='\t')
+
+    #########################
+    #### metrics modules ####
+    #########################
+    if (inputArgs.subcommand=='metrics'):
+        
+        # Load calibration data
+        pred_result = pd.read_csv(inputArgs.pred, sep="\t", index_col=0)
+        ground_truth = pd.read_csv(inputArgs.gt, sep="\t", index_col=0)
+
+        corr_result = prediction.do_eval(pred_result,ground_truth)
+        corr_result.to_csv(inputArgs.outdir+'metrics.txt',sep='\t')
 
 if __name__ == "__main__":
     main()

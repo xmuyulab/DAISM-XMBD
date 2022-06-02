@@ -9,6 +9,8 @@ from torch.autograd import Variable
 import torch.utils.data as Data
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+import sys
+
 
 
 def minmaxscaler(x):
@@ -87,6 +89,31 @@ class MLP(torch.nn.Module):
         y = self.predict(y)   
         return y
 
+class MLP_sum2one(torch.nn.Module):  
+    def __init__(self,INPUT_SIZE,OUTPUT_SIZE):
+        super(MLP_sum2one, self).__init__() 
+        # Architectures 
+        L1 = 1024
+        L2 = 512
+        L3 = 256
+        self.hidden = torch.nn.Sequential(                       
+            nn.Linear(INPUT_SIZE, L1),
+            nn.ReLU(),
+            nn.Linear(L1,L2),
+            nn.BatchNorm1d(L2),
+            nn.ReLU(),
+            nn.Linear(L2,L3),
+            nn.ReLU(),
+        )
+        self.predict =  torch.nn.Sequential( 
+            nn.Linear(L3, OUTPUT_SIZE),
+            nn.Softmax(),
+        )
+    def forward(self, x):   
+        y = self.hidden(x)    
+        y = self.predict(y)   
+        return y
+
 def evaluate(model,xve,yve):
     """
     In each epoch, use validation data to evaluate model
@@ -105,7 +132,7 @@ def evaluate(model,xve,yve):
 
     return mae_ve
 
-def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0):
+def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,batchsize=64,ncuda=0,sum2one=False,p=False):
 
     print('Model training start!')
 
@@ -129,7 +156,10 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
     torch.manual_seed(random_seed)
     torch.cuda.manual_seed_all(random_seed)
 
-    model = MLP(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
+    if sum2one == True:
+        model =  MLP_sum2one(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
+    else:
+        model = MLP(INPUT_SIZE = gn,OUTPUT_SIZE = cn).double()
 
     if torch.cuda.is_available():
         model = model.cuda(ncuda)  
@@ -141,10 +171,12 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
     for epoch in range(num_epoches):
         
         mae_tr=[]
+        step_loss =[]
         for step, (batch_x, batch_y) in enumerate(trainloader):
 
-            batch_x = batch_x.cuda(ncuda)
-            batch_y = batch_y.cuda(ncuda)
+            if torch.cuda.is_available():
+                batch_x = batch_x.cuda(ncuda)
+                batch_y = batch_y.cuda(ncuda)
             model.train()
             optimizer.zero_grad()
             out = model(batch_x)
@@ -154,17 +186,19 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
             tr_p = Variable(out,requires_grad = False).cpu().numpy().reshape(batchsize*cn)  
             tr_t = Variable(batch_y,requires_grad = False).cpu().numpy().reshape(batchsize*cn)
             mae_tr.append(np.mean(abs(tr_p - tr_t)))
+            step_loss.append(loss.item())
         
         # learning rate decay
         mae_tr_change = (np.mean(mae_tr)-mae_tr_prev)
         mae_tr_prev = np.mean(mae_tr)
+        
         if mae_tr_change > dm:         
             optimizer.param_groups[0]['lr'] *= de_lr   
         if optimizer.param_groups[0]['lr'] < lr_min:
             optimizer.param_groups[0]['lr'] = lr_min
-
-        # early-stopping
-        mae_ve.append(evaluate(model,data.xve,data.yve))        
+        
+        mae_ve.append(evaluate(model,data.xve,data.yve))
+        # early-stopping  
         if epoch >= min_epoch:
             if mae_ve[epoch] <= min_mae:
                 min_mae = mae_ve[epoch]
@@ -175,8 +209,26 @@ def dnn_training(mixsam,mixfra,random_seed,modelpath,num_epoches=300,lr=1e-4,bat
             if n==10:
                 break
 
+        sys.stdout.write('\r')
+        sys.stdout.write(' Epoch %3d \t MSE_loss: %.6f' %(epoch,  np.mean(step_loss)))
+        sys.stdout.flush()
     model.load_state_dict(torch.load(modelpath+'DAISM_model.pkl'))
 
-    print("Model training finish!")
+    print("\n Model training finish!")
+    if p==True:
+        model.eval()
+        train_out = model(data.xtr.cuda(ncuda))
+        train_out = Variable(train_out,requires_grad = False).cpu().numpy().reshape(-1)
+        train_y = Variable(data.ytr,requires_grad = False).cpu().numpy().reshape(-1) 
+        train_cor = np.corrcoef(train_out,train_y)[0,1]
+
+        v_out = model(data.xve)
+        v_out = Variable(v_out,requires_grad = False).cpu().numpy().reshape(-1)
+        v_y = Variable(data.yve,requires_grad = False).cpu().numpy().reshape(-1) 
+        v_cor = np.corrcoef(v_out,v_y)[0,1]
+
+        print("--------------------------------")
+        print("Training set accuracy: %.6f" %(train_cor))
+        print("Validation set accuracy: %.6f" %(v_cor))
 
     return model
